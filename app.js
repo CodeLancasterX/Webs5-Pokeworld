@@ -1,21 +1,43 @@
 const express = require('express');
 const morgan = require('morgan');
+const mongoose = require('mongoose');
+require('dotenv').config();
 
 const userRoutes = require('./routes/users');
 const pokemonRoutes = require('./routes/pokemon');
 const battleRoutes = require('./routes/battles');
 const app = express();
 
+connectMongoDB().catch(err => console.log(err));
+
+async function connectMongoDB() {
+    console.log(process.env.MongoDBConnectionString)
+  await mongoose.connect(process.env.MongoDBConnectionString);
+}
+
 app.use(morgan('dev'));
 //makes it possible for the body to be accessed.
 app.use(express.urlencoded({extended: false}));
 app.use(express.json());
+//handling CORS, second argument in allow orgin specifies who has access to data from api. 
+//second argument in allow header specifies which headers are allowed in requests.
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Header', '*');
+    
+    //empty object because this responds shows the client which methods are allowed in the header.
+    if (req.method === 'OPTIONS'){
+        res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, PATCH, DELETE');
+        return res.status(200).json({});
+    }
+    next();
+})
 
 app.use('/users', userRoutes);
 app.use('/pokemon', pokemonRoutes);
 app.use('/battles', battleRoutes);
 
-//Error handling
+//error handling
 app.use((req, res, next) => {
     const error = new Error('Not found');
     error.status = 404;
