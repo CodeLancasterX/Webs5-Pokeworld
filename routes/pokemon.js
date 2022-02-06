@@ -25,11 +25,15 @@ router.get('/:userId', (req, res, next) => {
     }
 })
 
-
 //create pokemon
 router.post('/', (req, res, next) => {
+    const pokemon = {
+        name: req.body.name,
+        customName: req.body.customName
+    }
     res.status(201).json({
-        message: 'posting pokemon route ready.'
+        message: 'posting pokemon route ready.',
+        newPokemon: pokemon
     })
 })
 

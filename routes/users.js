@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
+
 //get users
 router.get('/', (req, res, next) => {
     res.status(200).json({
@@ -35,14 +36,14 @@ router.post('/', (req, res, next) => {
 //update users
 router.patch('/', (req, res, next) => {
     res.status(200).json({
-        message: 'update route ready.'
+        message: 'update user route ready.'
     })
 })
 
 //delete users
 router.delete('/', (req, res, next) => {
     res.status(200).json({
-        message: 'delete route ready.'
+        message: 'delete user route ready.'
     })
 })
 
