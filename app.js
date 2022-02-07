@@ -11,7 +11,6 @@ const app = express();
 connectMongoDB().catch(err => console.log(err));
 
 async function connectMongoDB() {
-    console.log(process.env.MongoDBConnectionString)
   await mongoose.connect(process.env.MongoDBConnectionString);
 }
 

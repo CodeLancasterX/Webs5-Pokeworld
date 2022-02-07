@@ -13,7 +13,7 @@ router.get('/', (req, res, next) => {
             res.status(200).json(obj);
         } else {
             res.status(200).json({
-                message: 'no pokemon available.'
+                message: 'No pokemon available.'
             })
         }
         console.log(obj);
@@ -38,7 +38,7 @@ router.get('/:pokemonId', (req, res, next) => {
             res.status(200).json(obj)
         } else {
             res.status(404).json({
-                message: 'No valid object found for ID: ' + id
+                message: 'No pokemon found for ID: ' + id
             })
         }
         
@@ -59,24 +59,24 @@ router.post('/', (req, res, next) => {
     //exec turn the following into a promise
     pokemon.save().then(result => {
         console.log(result);
-    })
-    .catch(err => console.log(err));
 
-    res.status(201).json({
-        message: 'posting pokemon route ready.',
-        createdPokemon: pokemon
+        res.status(201).json({
+            message: pokemon.name + ' has been created.',
+            createdPokemon: pokemon
+        });
     })
+    .catch(err => {
+        console.log(err)
+        res.status(500).json({
+            error: err
+        })
+    });
+
 })
 
 //update pokemon
 router.patch('/:pokemonId', (req, res, next) => {
     const id = req.params.pokemonId;
-
-    // const updateOps = {};
-    
-    // for (const ops in req.body) {
-    //     updateOps[ops.propName] = ops.value; 
-    // };
 
     Pokemon.updateOne({ _id: id }, {$set: {
         name: req.body.name,
