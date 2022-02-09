@@ -7,10 +7,21 @@ const mongoose = require('mongoose');
 //get users
 router.get('/', (req, res, next) => {
     User.find()
+    .select('name')
     .exec()
     .then(obj => {
+
         if(obj.length >= 1){
-            res.status(200).json(obj)
+
+            const response = obj.map( obj => {
+                return {
+                    name: obj.name,
+                    _id: obj._id,
+                    url: req.protocol + '://' + req.get('host') + req.originalUrl + '/' + obj._id
+                }
+            })
+
+            res.status(200).json(response)
         } else {
             res.status(200).json({
                 message: 'No users available.'
@@ -59,7 +70,8 @@ router.post('/', (req, res, next) => {
     .then( result => {
         console.log(result);
         res.status(200).json({
-            message: "User: \`"+ user.name + "\` has been created"
+            message: "User: \`"+ user.name + "\` has been created",
+            url: req.protocol + '://' + req.get('host') + req.originalUrl + '/' + user._id
         });
     })
     .catch( err => res.status(500).json({
@@ -76,8 +88,20 @@ router.patch('/:userId', (req, res, next) => {
     }})
     .exec()
     .then( result => {
-        console.log(res);
-        res.status(200).json(result);
+        console.log(result);
+        const user = {
+            message: req.body.name + ' has been updated.',
+            _id: res._id,
+            name: res.name
+        }
+        if (result.modifiedCount >= 1){
+            res.status(200).json(user);
+        } else {
+            res.status(404).json({
+                message: "No user found for ID: " + id + "."
+            });
+        }
+        
     })
     .catch(err => {
         console.log(err);
@@ -87,15 +111,17 @@ router.patch('/:userId', (req, res, next) => {
     });
 })
 
-//delete users
+//delete user
 router.delete('/:userId', (req, res, next) => {
     const Id = req.params.userId;
-
     User.remove({ _id: Id })
     .exec()
     .then( result => {
         console.log(result);
-        res.status(200).json(result);
+
+        res.status(200).json({
+            message: "User has succesfully been deleted."
+        });
     })
     .catch( err => {
         res.status(500).json({

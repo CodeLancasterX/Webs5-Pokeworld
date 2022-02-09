@@ -3,7 +3,7 @@ const Item = require('./items');
 
 pokemonSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
-    name: String,
+    name: { type: String, required: true },
     nickName: String,
     description: String,
     // heldItem: Item

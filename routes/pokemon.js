@@ -7,17 +7,31 @@ const router = express.Router();
 //get pokemon
 router.get('/', (req, res, next) => {
     Pokemon.find()
+    .select('name nickName')
     .exec()
     .then(obj => {
+
         if (obj.length >= 1){
-            res.status(200).json(obj);
+
+            const response = {
+                count: obj.length,
+                pokemon: obj.map( obj => {
+                    return {
+                        name: obj.name,
+                        nickName: obj.nickName,
+                        _id: obj._id,
+                        url: req.protocol + '://' + req.get('host') + req.originalUrl + '/' + obj._id
+                    }
+                })
+            }
+            console.log(response);
+            res.status(200).json(response);
+
         } else {
             res.status(200).json({
                 message: 'No pokemon available.'
             })
         }
-        console.log(obj);
-
     })
     .catch( err => {
         console.log(err);
@@ -31,6 +45,7 @@ router.get('/', (req, res, next) => {
 router.get('/:pokemonId', (req, res, next) => {
     const id = req.params.pokemonId;
     Pokemon.findById(id)
+    .select('name nickName')
     .exec()
     .then( obj => {
         console.log(obj)
@@ -61,8 +76,8 @@ router.post('/', (req, res, next) => {
         console.log(result);
 
         res.status(201).json({
-            message: pokemon.name + ' has been created.',
-            createdPokemon: pokemon
+            message: "Pokemon: \`"+ pokemon.name + "\` has been created",
+            url: req.protocol + '://' + req.get('host') + req.originalUrl + '/' + pokemon._id
         });
     })
     .catch(err => {
@@ -80,12 +95,24 @@ router.patch('/:pokemonId', (req, res, next) => {
 
     Pokemon.updateOne({ _id: id }, {$set: {
         name: req.body.name,
-        nickName: req.body.customName
+        nickName: req.body.nickName
     }})
     .exec()
     .then( result => {
-        console.log(res);
-        res.status(200).json(result);
+        console.log(result);
+        const pokemon = {
+            message: req.body.name + " has been updated.",
+            _id: id,
+            url: req.protocol + '://' + req.get('host') + req.originalUrl
+        }
+        if (result.modifiedCount >= 1){
+            res.status(200).json(pokemon);
+        } else {
+            res.status(404).json({
+                message: "No pokemon found for ID: " + id + "."
+            });
+        }
+        
     })
     .catch(err => {
         console.log(err);
@@ -101,7 +128,10 @@ router.delete('/:pokemonId', (req, res, next) => {
     Pokemon.remove({ _id: id })
     .exec()
     .then( result => {
-        res.status(200).json(result);
+        console.log(result)
+        res.status(200).json({
+            message: "Pokemon has succesfully been deleted."
+        });
     })
     .catch( err => {
         res.status(500).json({

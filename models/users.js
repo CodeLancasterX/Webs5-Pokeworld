@@ -2,9 +2,9 @@ const mongoose = require('mongoose');
 const Pokemon = require('./pokemon');
 
 
-const userSchema = mongoose.Schema({
+userSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
-    name: String,
+    name: { type: String, required: true },
     // pokemon: [Pokemon]
 
 });
