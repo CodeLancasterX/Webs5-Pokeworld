@@ -16,8 +16,9 @@ async function connectMongoDB() {
 }
 
 app.use(morgan('dev'));
-//makes it possible for the body to be accessed.
+//recognise incoming requests as string or body.
 app.use(express.urlencoded({extended: false}));
+//recognise incoming requests as json.
 app.use(express.json());
 //handling CORS, second argument in allow orgin specifies who has access to data from api. 
 //second argument in allow header specifies which headers are allowed in requests.

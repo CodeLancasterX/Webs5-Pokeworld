@@ -7,6 +7,7 @@ const router = express.Router();
 router.get('/', (req, res, next) => {
     BattleRequest.find()
     .select('_id challenger defender status')
+    .populate('challenger defender', 'name')
     .exec()
     .then( obj => {
 
