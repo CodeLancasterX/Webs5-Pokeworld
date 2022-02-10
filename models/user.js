@@ -1,12 +1,9 @@
 const mongoose = require('mongoose');
-const Pokemon = require('./pokemon');
-
 
 userSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
     name: { type: String, required: true },
-    // pokemon: [Pokemon]
-
+    caughtPokemon: { type: mongoose.Schema.Types.ObjectId, ref: 'Pokemon'}
 });
 
 module.exports = mongoose.model('User', userSchema);

@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
 encounterSchema = mongoose.Schema({
-    _id = mongoose.Schema.Types.ObjectId,
-    // pokemon = 
+    _id: mongoose.Schema.Types.ObjectId,
+    pokemon: { type: mongoose.Schema.Types.ObjectId, ref: 'Pokemon'}
 });
 
 

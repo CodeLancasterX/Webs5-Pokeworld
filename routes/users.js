@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/users');
+const User = require('../models/user');
 const mongoose = require('mongoose');
 
 
@@ -69,7 +69,7 @@ router.post('/', (req, res, next) => {
     user.save()
     .then( result => {
         console.log(result);
-        res.status(200).json({
+        res.status(201).json({
             message: "User: \`"+ user.name + "\` has been created",
             url: req.protocol + '://' + req.get('host') + req.originalUrl + '/' + user._id
         });

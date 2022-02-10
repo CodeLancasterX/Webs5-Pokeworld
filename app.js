@@ -6,6 +6,7 @@ require('dotenv').config();
 const userRoutes = require('./routes/users');
 const pokemonRoutes = require('./routes/pokemon');
 const battleRoutes = require('./routes/battles');
+const battleRequestRoutes = require('./routes/battleRequests');
 const app = express();
 
 connectMongoDB().catch(err => console.log(err));
@@ -35,6 +36,7 @@ app.use((req, res, next) => {
 app.use('/users', userRoutes);
 app.use('/pokemon', pokemonRoutes);
 app.use('/battles', battleRoutes);
+app.use('/battlerequests', battleRequestRoutes);
 
 //error handling
 app.use((req, res, next) => {

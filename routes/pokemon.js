@@ -67,7 +67,7 @@ router.get('/:pokemonId', (req, res, next) => {
 //create pokemon
 router.post('/', (req, res, next) => {
     const pokemon = new Pokemon({
-        _id: new mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId,
         name: req.body.name,
         nickName: req.body.nickName
     });
