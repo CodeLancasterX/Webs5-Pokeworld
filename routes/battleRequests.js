@@ -40,6 +40,7 @@ router.get('/:id', (req, res, next) => {
     const id = req.params.id;
     BattleRequest.findById(id)
     .select('_id challenger defender status')
+    .populate('challenger defender', 'name')
     .exec()
     .then( result => {
         console.log(result);
