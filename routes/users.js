@@ -63,34 +63,44 @@ router.get('/:userId', (req, res, next) => {
 //create users
 router.post('/signup', (req, res, next) => {
     
-    bcrypt.hash(req.body.password, 10, (err, hash) => {
-        if (err) {
-            return res.status(500).json({
-                error: err
+    User.find({ email: req.body.email})
+    .exec()
+    .then( user => {
+        console.log(user)
+        if (user.length > 0) {
+            return res.status(409).json({
+                message: 'Email already in use.'
             })
         } else {
-            const user = new User({
-                _id: new mongoose.Types.ObjectId,
-                name: req.body.name,
-                email: req.body.email,
-                password: hash,
-                pokemon: req.body.pokemon
-            });
-            
-            user.save()
-            .then( result => {
-                console.log(result);
-                res.status(201).json({
-                    message: "User: \`"+ user.name + "\` has been created",
-                    url: req.protocol + '://' + req.get('host') + req.originalUrl + '/' + user._id
-                });
+            bcrypt.hash(req.body.password, 10, (err, hash) => {
+                if (err) {
+                    return res.status(500).json({
+                        error: err
+                    })
+                } else {
+                    const user = new User({
+                        _id: new mongoose.Types.ObjectId,
+                        name: req.body.name,
+                        email: req.body.email,
+                        password: hash,
+                        pokemon: req.body.pokemon
+                    });
+                    
+                    user.save()
+                    .then( result => {
+                        console.log(result);
+                        res.status(201).json({
+                            message: "User: \`"+ user.name + "\` has been created",
+                            url: req.protocol + '://' + req.get('host') + req.originalUrl + '/' + user._id
+                        });
+                    })
+                    .catch( err => res.status(500).json({
+                        error: err
+                    }));
+                }
             })
-            .catch( err => res.status(500).json({
-                error: err
-            }));
         }
     })
-
 
 })
 
@@ -99,15 +109,17 @@ router.patch('/:userId', (req, res, next) => {
     const id = req.params.userId;
 
     User.updateOne({ _id: id }, {$set: {
-        name: req.body.name
+        name: req.body.name,
+        email: req.body.email
     }})
     .exec()
     .then( result => {
         console.log(result);
         const user = {
             message: req.body.name + ' has been updated.',
-            _id: res._id,
-            name: res.name
+            _id: id,
+            name: req.body.name,
+            email: req.body.email
         }
         if (result.modifiedCount >= 1){
             res.status(200).json(user);
@@ -135,7 +147,7 @@ router.delete('/:userId', (req, res, next) => {
         console.log(result);
 
         res.status(200).json({
-            message: "User has succesfully been deleted."
+            message: "User with ID: " + Id + " has succesfully been deleted."
         });
     })
     .catch( err => {
