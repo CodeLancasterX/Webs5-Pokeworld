@@ -4,8 +4,8 @@ const User = require('../models/user');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const Pokemon = require('../models/pokemon');
-const Battles = require('../models/battle');
-// const checkAuth = require('../Auth/check-auth');
+const Battle = require('../models/battle');
+const checkAuth = require('../Auth/check-auth');
 const jwt = require('jsonwebtoken');
 
 
@@ -83,12 +83,16 @@ router.get('/:userId/pokemon', (req, res, next) => {
                 result: result
             })
         })
-        .catch()
+        .catch(err => {
+            res.status(500).json({
+                error: err
+            });
+        })
 
 })
 
 //get specific user owned pokemon (is this useful?)
-router.get('/:userId/:pokemonId', (req, res, next) => {
+router.get('/:userId/pokemon/:pokemonId', (req, res, next) => {
 
     User.findById(req.params.userId)
         .exec()
@@ -107,11 +111,46 @@ router.get('/:userId/:pokemonId', (req, res, next) => {
 })
 
 //get user battles
-router.get('/:userId/battles')
+router.get('/:userId/battles', (req, res, next) => {
+    const userId = req.params.userId
+    User.findById(userId)
+        .select('challenger defender winner')
+        .exec()
+        .then(result => {
+            if (result) {
+                Battle.find({
+                        challenger: userId
+                    } || {
+                        defender: userId
+                    })
+                    .exec()
+                    .then(battles => {
+                        console.log(battles)
+                        if (battles.length > 0) {
+                            res.status(200).json(battles)
+                        } else {
+                            return res.status(404).json({
+                                message: 'No battles found for this user.'
+                            })
+                        }
+                    })
+                    .catch(err => {
+                        res.status(500).json({
+                            error: err
+                        });
+                    })
+            }
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err
+            })
+        })
+})
 
 //create users
 router.post('/signup', (req, res, next) => {
-
+    //TODO: check if password is accessible
     User.find({
             email: req.body.email
         })
@@ -167,7 +206,11 @@ router.post('/signup', (req, res, next) => {
                                     })
                                 }
                             })
-                            .catch()
+                            .catch(err => {
+                                res.status(500).json({
+                                    err: error
+                                })
+                            })
                     }
                 })
             }
@@ -179,6 +222,7 @@ router.patch('/login', (req, res, next) => {
     User.find({
             email: req.body.email
         })
+        .select('email password _id')
         .exec()
         .then(user => {
             if (user.length < 1) {
@@ -188,7 +232,7 @@ router.patch('/login', (req, res, next) => {
             }
             bcrypt.compare(req.body.password, user[0].password, (err, result) => {
                 if (err) {
-                    res.status(401).json({
+                    return res.status(401).json({
                         message: 'Auth failed.'
                     })
                 }
@@ -221,40 +265,74 @@ router.patch('/login', (req, res, next) => {
 })
 
 //update users
-router.patch('/:userId', (req, res, next) => {
+router.patch('/:userId', checkAuth ,(req, res, next) => {
     const id = req.params.userId;
+    const email = req.body.email;
+    const name = req.body.name;
 
-    // User.find({ })
+    // User.find({ }) see if email already exists before updating.
+    // see if email and/or name is null after using find method.
 
-    User.updateOne({
-            _id: id
-        }, {
-            $set: {
-                name: req.body.name,
-                email: req.body.email
-            }
-        })
+    User.find({ email: email } || { name: name })
         .exec()
-        .then(result => {
-            console.log(result);
-            const user = {
-                message: req.body.name + ' has been updated.',
-                _id: id,
-                name: req.body.name,
-                email: req.body.email
-            }
-            if (result.modifiedCount >= 1) {
-                res.status(200).json(user);
-            } else if (result.modifiedCount == 0 && result.matchedCount == 1) {
-                res.status(200).json({
-                    message: "No new fields were given for: " + id + "."
-                });
+        .then(uniqueResult => {
+            console.log(uniqueResult + " some text")
+            if (uniqueResult[0] != null) {
+                console.log(uniqueResult[0].email + " some text")
+                if (uniqueResult[0].email == email || uniqueResult[0].name == name) {
+                    if (uniqueResult[0].email == email) {
+                        return res.status(409).json({
+                            message: 'Email already exists.'
+                        })
+                    } 
+                    
+                    if (uniqueResult[0].name == name){
+                        return res.status(409).json({
+                            message: 'Username already exists.'
+                        })
+                    }
+                }
             } else {
-                res.status(404).json({
-                    message: "No user found for ID: " + id + "."
-                });
+                bcrypt.hash(req.body.password, 10, (err, hash) => {
+                    if (err){
+                        return res.status(500).json({
+                            error: err
+                        })
+                    } else {
+                        req.body.password = hash
+                        User.updateOne({
+                            _id: id
+                        }, { $set: req.body })
+                        .exec()
+                        .then(result => {
+                            // console.log(result);
+    
+                            const user = {
+                                message: 'User has been updated.',
+                                _id: id,
+                                name: name,
+                                email: email,
+                                password: hash
+                            }
+                            if (result.modifiedCount >= 1) {
+                                res.status(200).json(user);
+                            } else if (result.modifiedCount == 0 && result.matchedCount == 1) {
+                                res.status(200).json({
+                                    message: "No new fields were given for: " + id + "."
+                                });
+                            } else {
+                                res.status(404).json({
+                                    message: "No user found for ID: " + id + "."
+                                });
+                            }
+    
+                        }).catch(err => {
+                            res.status(500).json({error: err});
+                        })
+                    }
+                })
+               
             }
-
         })
         .catch(err => {
             console.log(err);
