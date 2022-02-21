@@ -1,8 +1,8 @@
 const Pokemon = require('../models/pokemon');
 const express = require('express');
 const mongoose = require('mongoose');
+const checkAuth = require('../Auth/check-auth');
 const router = express.Router();
-
 
 //get pokemon
 router.get('/', (req, res, next) => {
@@ -65,11 +65,11 @@ router.get('/:pokemonId', (req, res, next) => {
 })
 
 //create pokemon
-router.post('/', (req, res, next) => {
+router.post('/', checkAuth, (req, res, next) => {
     const pokemon = new Pokemon({
         _id: new mongoose.Types.ObjectId,
         name: req.body.name,
-        nickName: req.body.nickName
+        starter: req.body.starter
     });
     //exec turn the following into a promise
     pokemon.save().then(result => {

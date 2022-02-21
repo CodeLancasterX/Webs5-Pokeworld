@@ -96,7 +96,7 @@ router.patch('/:id', (req, res, next) => {
         console.log(result);
         if (req.body.status) {
             const battleRequest = {
-                message: 'battle request with ID: '+ id + ' has been updated.',
+                message: 'Battle request with ID: '+ id + ' has been updated.',
                 _id: id,
                 url: req.protocol + '://' + req.get('host') + req.originalUrl
             }
