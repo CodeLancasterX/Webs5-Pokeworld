@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 pokemonSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
     pokeId: Number,
+    owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User'},
     name: { type: String, required: true, unique: true },
     nickName: { type: String, required: false },
     starter: { type: Boolean, required: true, default: false },

@@ -11,7 +11,7 @@ router.get('/', (req, res, next) => {
 
     Battle.find()
     .select('challenger defender winner')
-    .populate('challenger defender', 'name')
+    .populate('challenger defender winner', 'name')
     .exec()
     .then( result => {
 
@@ -47,7 +47,7 @@ router.get('/:id', (req, res, next) => {
 
     Battle.findById(id)
     .select('challenger defender winner')
-    .populate('challenger defender', 'name')
+    .populate('challenger defender winner', 'name')
     .exec()
     .then( result => {
         if (result){
