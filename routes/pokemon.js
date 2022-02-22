@@ -2,67 +2,14 @@ const Pokemon = require('../models/pokemon');
 const express = require('express');
 const mongoose = require('mongoose');
 const checkAuth = require('../Auth/check-auth');
+const PokemonController = require('../Controllers/PokemonController');
 const router = express.Router();
 
 //get pokemon
-router.get('/', (req, res, next) => {
-    Pokemon.find()
-    .select('name nickName')
-    .exec()
-    .then(obj => {
-
-        if (obj.length >= 1){
-
-            const response = {
-                count: obj.length,
-                pokemon: obj.map( obj => {
-                    return {
-                        name: obj.name,
-                        nickName: obj.nickName,
-                        _id: obj._id,
-                        url: req.protocol + '://' + req.get('host') + req.originalUrl + '/' + obj._id
-                    }
-                })
-            }
-            console.log(response);
-            res.status(200).json(response);
-
-        } else {
-            res.status(200).json({
-                message: 'No pokemon available.'
-            })
-        }
-    })
-    .catch( err => {
-        console.log(err);
-        res.status(500).json({
-            error: err
-        });
-    });
-}); 
+router.get('/', PokemonController.get_all_pokemon); 
 
 //get specific pokemon
-router.get('/:pokemonId', (req, res, next) => {
-    const id = req.params.pokemonId;
-    Pokemon.findById(id)
-    .select('name nickName')
-    .exec()
-    .then( obj => {
-        console.log(obj)
-        if (obj) {
-            res.status(200).json(obj)
-        } else {
-            res.status(404).json({
-                message: 'No pokemon found for ID: ' + id
-            })
-        }
-        
-    })
-    .catch(err => {
-        console.log(err);
-        res.status(500).json({error: err});
-    });
-})
+router.get('/:pokemonId', PokemonController.get_pokemon_by_Id);
 
 //create pokemon
 router.post('/', checkAuth, (req, res, next) => {

@@ -7,7 +7,7 @@ userSchema = mongoose.Schema({
     password: { type: String, required: true },
     name: { type: String, required: true, unique: true },
     caughtPokemon: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'Pokemon'},
-    // isAdmin: {type: Boolean, required: true, default: false}
+    isAdmin: {type: Boolean, required: true, default: false}
 });
 
 module.exports = mongoose.model('User', userSchema);
