@@ -441,7 +441,6 @@ router.patch('/:userId/encounters/:encounterId', /* check-auth, */ (req, res, ne
                                     })
                                     pokemon.save()
                                         .then(result => {
-                                            console.log(result + ' yuuuuuuurrrr');
                                             console.log(pokemon._id)
                                             User.findOneAndUpdate({
                                                     _id: encounter.user
@@ -671,20 +670,37 @@ async function getPokeMoves(pokeMoves, movesArray) {
         console.log(pokeMove + ' the move.');
         let body = await rp('https://pokeapi.co/api/v2/move/' + pokeMove);
         const moveData = await JSON.parse(body);
-        const move = await Move({
-            _id: new mongoose.Types.ObjectId,
-            name: pokeMove,
-            description: moveData.effect_entries[0].effect,
-            type: moveData.damage_class.name,
-            accuracy: moveData.accuracy
+
+        //see if move is already known in database, if it is then add id to array
+        //if not then api call for move info and create move.
+        Move.findOne({name: pokeMove})
+        .exec()
+        .then( async queriedMove => {
+            if (queriedMove != null){
+                console.log(queriedMove.name + ' is already in the database! :), its ID: ' + queriedMove._id)
+                movesArray.push(queriedMove._id);
+            } else {
+                const move = await Move({
+                    _id: new mongoose.Types.ObjectId,
+                    name: pokeMove,
+                    description: moveData.effect_entries[0].effect,
+                    type: moveData.damage_class.name,
+                    accuracy: moveData.accuracy
+                })
+                move.save()
+                    .then(result => {
+                        movesArray.push(result._id);
+                        console.log(result + 'movesupdate');
+                    });
+            }
         })
-        move.save()
-            .then(result => {
-                movesArray.push(result._id);
-                console.log(result + 'movesupdate');
+        .catch( err => {
+            res.status(500).json({
+                error: err
+            })
+        })
 
 
-            });
     }
     return movesArray;
 }
