@@ -5,7 +5,8 @@ moveSchema = mongoose.Schema({
     name: {type: String, required: true},
     description: {type: String, required: false},
     type: {type: String, required: false},
-    accuracy: {type: Number, required: false}
+    accuracy: {type: Number, required: false},
+    power: {type: Number, required: false, default: 0}
 });
 
 module.exports = mongoose.model('Move', moveSchema);

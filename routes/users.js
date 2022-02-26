@@ -670,7 +670,7 @@ router.delete('/:userId', (req, res, next) => {
 async function getPokeMoves(pokeMoves, movesArray) {
     
     for (const pokeMove of pokeMoves) {
-        console.log(pokeMove + ' the move.');
+        // console.log(pokeMove + ' the move.');
         let body = await rp('https://pokeapi.co/api/v2/move/' + pokeMove);
         const moveData = await JSON.parse(body);
 
@@ -688,12 +688,13 @@ async function getPokeMoves(pokeMoves, movesArray) {
                     name: pokeMove,
                     description: moveData.effect_entries[0].effect,
                     type: moveData.damage_class.name,
-                    accuracy: moveData.accuracy
+                    accuracy: moveData.accuracy,
+                    power: moveData.power
                 })
                 move.save()
                     .then(result => {
                         movesArray.push(result._id);
-                        console.log(result + 'movesupdate');
+                        // console.log(result + 'movesupdate');
                     });
             }
         })

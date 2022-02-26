@@ -40,7 +40,8 @@ exports.get_all_pokemon = (req, res, next) => {
 exports.get_pokemon_by_Id = (req, res, next) => {
     const id = req.params.pokemonId;
     Pokemon.findById(id)
-    .select('name nickName')
+    .populate('moves', 'name power')
+    .select('pokemonId name nickName owner type weight height description moves imageUrl')
     .exec()
     .then( obj => {
         console.log(obj)
