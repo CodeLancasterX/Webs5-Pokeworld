@@ -1,6 +1,7 @@
 const express = require('express');
 const Battle = require('../models/battle');
 const User = require('../models/user');
+const checkAdmin = require('../Auth/check-admin');
 const mongoose = require('mongoose');
 const router = express.Router();
 
@@ -68,7 +69,7 @@ router.get('/:id', (req, res, next) => {
 
 
 //create battles
-router.post('/', (req, res, next) => {
+router.post('/', checkAdmin, (req, res, next) => {
 
     const battle = new Battle({
         _id: new mongoose.Types.ObjectId,
@@ -92,7 +93,7 @@ router.post('/', (req, res, next) => {
 })
 
 //update battles
-router.patch('/:id', (req, res, next) => {
+router.patch('/:id', checkAdmin, (req, res, next) => {
     
     const id = req.params.id;
     const userId = req.body.winner;
@@ -131,7 +132,7 @@ router.patch('/:id', (req, res, next) => {
 })
 
 //delete battles
-router.delete('/:id', (req, res, next) => {
+router.delete('/:id', checkAdmin, (req, res, next) => {
     const id = req.params.id;
     Battle.deleteOne({ _id: id })
     .exec()

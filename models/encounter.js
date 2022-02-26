@@ -2,7 +2,17 @@ const mongoose = require('mongoose');
 
 encounterSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
-    pokemon: { type: mongoose.Schema.Types.ObjectId, ref: 'Pokemon'}
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    pokemon: {
+        pokemonId: { type: String },
+        name: { type: String, required: true },
+        imageUrl: { type: String, required: false },
+        type: { type: Array, required: true },
+        weight: { type: Number, required: false },
+        height: { type: Number, required: false },
+        moves: [{ type: String, required: false }]
+    },
+    caught: { type: Boolean, required: false, default: false }
 });
 
 

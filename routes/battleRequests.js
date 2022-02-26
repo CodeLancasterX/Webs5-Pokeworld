@@ -59,7 +59,7 @@ router.get('/:id', (req, res, next) => {
     })
 });
 
-router.post('/', /*checkAuth,*/ (req, res, next) => {
+router.post('/', checkAuth, (req, res, next) => {
     User.findById(req.body.defender)
     .exec()
     .then( defenderData => {
@@ -117,7 +117,7 @@ router.post('/', /*checkAuth,*/ (req, res, next) => {
 });
 
 //if accepted create new battle.
-router.patch('/:id', (req, res, next) => {
+router.patch('/:id', checkAuth, (req, res, next) => {
     //no new request may be made if one is still pending.
     const id = req.params.id;
     const status = req.body.status;
@@ -214,9 +214,15 @@ router.delete('/:id', (req, res, next) => {
     .exec()
     .then( result => {
         console.log(result)
-        res.status(200).json({
-            message: "Battle request has succesfully been deleted."
-        });
+        if (result.deletedCount < 1) {
+            return res.status(404).json({
+                message: 'No battle request could be found for id ' + id + '.'
+            })
+        } else {
+            res.status(200).json({
+                message: "Battle request has succesfully been deleted."
+            });
+        }
     })
     .catch( err => {
         res.status(500).json({
