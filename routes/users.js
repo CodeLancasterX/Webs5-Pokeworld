@@ -408,7 +408,7 @@ router.patch('/:userId/encounters/:encounterId', /* check-auth, */ (req, res, ne
                                     //Get move info, create new move object, set new pokemon property moves to 
                                     const movesArray = [];
                                     await getPokeMoves(encounter.pokemon.moves, movesArray).then(result => {
-                                        console.log(result + ' getpokemoves');
+                                        // console.log(result + ' getpokemoves');
                                     }).catch(err => {
                                         console.log(err);
                                     });
@@ -419,11 +419,14 @@ router.patch('/:userId/encounters/:encounterId', /* check-auth, */ (req, res, ne
                                 request('https://pokeapi.co/api/v2/pokemon-species/' + encounter.pokemon.name, async (error, response, body) => {
                                    
                                     const speciesData = JSON.parse(body);
-                                    const pokemonDescription = speciesData.flavor_text_entries[0].flavor_text;
-
-
-
-
+                                    let pokemonDescription = '';
+                                    
+                                    for (let i = 0; i < speciesData.flavor_text_entries.length; i++) {
+                                        if (speciesData.flavor_text_entries[i].language.name == 'en') {
+                                            pokemonDescription = speciesData.flavor_text_entries[i].flavor_text;
+                                            break;
+                                        }
+                                    }
 
                                     const pokemon = Pokemon({
                                         _id: new mongoose.Types.ObjectId,
@@ -478,7 +481,7 @@ router.patch('/:userId/encounters/:encounterId', /* check-auth, */ (req, res, ne
 
                             } else if (!encounter.caught && result.matchedCount == 1) {
                                 //if pokemon is not caught but the encounterId exists then tell user it got away.
-                                console.log('dont log if true.')
+                                // console.log('dont log if true.')
                                 encounter.message = encounterData.pokemon.name + ' got away.'
                                 res.status(200).json(encounter);
                             } else {
@@ -489,7 +492,7 @@ router.patch('/:userId/encounters/:encounterId', /* check-auth, */ (req, res, ne
                         })
                         .catch(err => {
                             res.status(500).json({
-                                error: err + 'is it this one?'
+                                error: err
                             })
                         })
                 } //check
@@ -501,7 +504,7 @@ router.patch('/:userId/encounters/:encounterId', /* check-auth, */ (req, res, ne
         })
         .catch(err => {
             res.status(500).json({
-                error: err + 'or this one?'
+                error: err
             })
         })
 })
