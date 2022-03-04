@@ -11,9 +11,7 @@ const checkAuth = require('../Auth/check-auth');
 const jwt = require('jsonwebtoken');
 const request = require('request');
 const rp = require('request-promise');
-const encounter = require('../models/encounter');
 const pokemon = require('../models/pokemon');
-
 
 //get users
 router.get('/', (req, res, next) => {
@@ -75,59 +73,106 @@ router.get('/:userId', (req, res, next) => {
 //get user owned pokemon
 router.get('/:userId/pokemon', (req, res, next) => {
 
-    User.findById(req.params.userId)
-        .select('caughtPokemon')
-        .populate('caughtPokemon', 'name')
-        .exec()
-        .then(result => {
-            console.log(result);
-
-            // caughtPokemon = {
-
-            // }
+    Pokemon.find({owner: req.params.userId})
+    .select('name nickName _id type')
+    .exec()
+    .then(result => {
+        if (result.length < 1) {
+            res.status(404).json({
+                message: 'No pokemon found under this trainer.'
+            })
+        } else {
             res.status(200).json({
                 result: result
             })
+        }
+
+    })
+    .catch(err => {
+        res.status(500).json({
+            error: err
+        });
+    })
+
+})
+
+//get specific user owned pokemon
+router.get('/:userId/pokemon/:pokemonId', checkAuth, (req, res, next) => {
+    // console.log(req.userData)
+    Pokemon.findOne({$and: [{owner: {$eq: req.userData.userId}}, {_id: { $eq: req.params.pokemonId}}]})
+    .select('name _id type moves')
+    .populate('moves', 'name')
+        .exec()
+        .then(result => {
+            if(result) {
+                res.status(200).json({
+                    result: result
+                })
+            } else {
+                res.status(404).json({
+                    message: 'User has not caught pokemon or pokemon does not exist.'
+                })
+            }
+
         })
         .catch(err => {
             res.status(500).json({
                 error: err
             });
         })
-
 })
 
-//get specific user owned pokemon (is this useful?)
-router.get('/:userId/pokemon/:pokemonId', (req, res, next) => {
+//get specific move for user owned pokemon
+router.get('/:userId/pokemon/:pokemonId/moves/:moveId', checkAuth, (req, res, next) => {
 
-    User.findById(req.params.userId)
+    Pokemon.findOne({$and: [{owner: {$eq: req.userData.userId}}, {_id: { $eq: req.params.pokemonId}}]})
+    .select('moves')
+    .populate('moves', '-__v')
         .exec()
-        .then(result => {
-            console.log(result);
+        .then(pokemon => {
+            if(pokemon) {
+                for (let i = 0; i < pokemon.moves.length; i++) {
+                    console.log(pokemon[i])
+                    if (pokemon.moves[i]._id == req.params.moveId){
+                        res.status(200).json(
+                           pokemon.moves[i]
+                        )
+                        break;
+                    } else if (i == pokemon.moves.length) {
+                        res.status(500).json({
+                            message: 'Pokemon does not have this move.'
+                        })
+                    }
+                }
 
-            // caughtPokemon = {
+            } else {
+                res.status(404).json({
+                    message: 'User has not caught pokemon or pokemon does not exist.'
+                })
+            }
 
-            // }
-            res.status(200).json({
-                result: result
-            })
         })
-        .catch()
+        .catch(err => {
+            res.status(500).json({
+                error: err
+            });
+        })
 })
 
 //get user battles
-router.get('/:userId/battles', (req, res, next) => {
+router.get('/:userId/battles',(req, res, next) => {
     const userId = req.params.userId
     User.findById(userId)
         .select('challenger defender winner')
         .exec()
         .then(result => {
+            console.log(result);
             if (result) {
-                Battle.find({
-                        challenger: userId
-                    } || {
-                        defender: userId
-                    })
+                Battle.find({$or: [{
+                        challenger: {$eq: userId}
+                    } , {
+                        defender: {$eq: userId}
+                    }]})
                     .exec()
                     .then(battles => {
                         console.log(battles)
@@ -144,6 +189,10 @@ router.get('/:userId/battles', (req, res, next) => {
                             error: err
                         });
                     })
+            } else {
+                res.status(404).json({
+                    message: 'No battles found for this user.'
+                })
             }
         })
         .catch(err => {
@@ -509,7 +558,7 @@ router.patch('/:userId/encounters/:encounterId', /* check-auth, */ (req, res, ne
         })
 })
 
-
+//login
 router.patch('/login', (req, res, next) => {
 
     User.find({
@@ -646,6 +695,109 @@ router.patch('/:userId', checkAuth, (req, res, next) => {
         });
 })
 
+//update user owned pokemon. solve null userId with checkAuth
+router.patch('/:userId/pokemon/:pokemonId/moves', (req, res, next) => {
+
+        if (req.body.moves.length < 4 ){
+            res.status(400).json({message: 'Please submit four moves for the pokemon.'}); 
+            return;
+        } 
+        Pokemon.findOne({$and: [{owner: {$eq: req.params.userId}}, {_id: {$eq: req.params.pokemonId}} ]})
+        .exec()
+        .then( async pokemon => {
+            // console.log(pokemon);
+            if (pokemon) {
+                const requestedMoves = req.body.moves
+                const movesArray = [];
+                
+
+                request('https://pokeapi.co/api/v2/pokemon/' + pokemon.name, async (error, response, body) => {
+                    const pokeData = JSON.parse(body);
+
+                    let pokeMoves = [];
+
+                    //see if requested moves are learnable by pokemon. 
+                    let notFound = false;
+                    for (let x = 0; x < requestedMoves.length; x++) {
+                        if (!notFound) {
+                            for (let y = 0; y < pokeData.moves.length; y++) {
+                                // console.log(pokeData.moves[y].move.name)
+                                if (pokeData.moves[y].move.name == requestedMoves[x]){
+                                    pokeMoves.push(requestedMoves[x])
+                                    break;
+                                } else if (y == pokeData.moves.length - 1) {
+                                    if (requestedMoves[x] == null) {
+                                        console.log(pokeData.moves[x] + " and " + pokemon.moves[x])
+                                        requestedMoves[x] = pokemon.moves[x];
+                                    }
+                                    res.status(404).json({
+                                        message: 'Pokemon cannot learn ' + requestedMoves[x]
+                                    })
+                                    notFound = true;
+                                    break;
+                                }
+                            }
+                        } else {
+                            break;
+                        }
+                    }
+
+                    await getPokeMoves(pokeMoves, movesArray).then( async result => {
+                        // console.log(result + ' getpokemoves');
+                        console.log(movesArray)
+                        Pokemon.findOneAndUpdate({$and: [{owner: {$eq: req.params.userId}}, {_id: {$eq: req.params.pokemonId}} ]}, {$set: {moves: movesArray}}, {new: true})
+                        .exec()
+                        .then(pokemon => {
+                            res.status(200).json({
+                                result: pokemon
+                            })
+                        })
+                        .catch()
+                    }).catch( err =>{
+                        console.log(err)
+                    })
+    
+                 });
+
+            } else {
+                res.status(404).json({
+                    message: 'Pokemon could not be found.'
+                })
+            }
+            
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err
+        })
+
+    })
+})
+
+router.patch('/:userId/pokemon/:pokemonId', (req, res, next) => {
+
+        Pokemon.findOneAndUpdate({$and: [{owner: {$eq: req.params.userId}}, {_id: {$eq: req.params.pokemonId}} ]}, {$set: {nickName: req.body.nickName}}, {new: true})
+        .exec()
+        .then( result => {
+            // console.log(result);
+            if (result) {
+                res.status(200).json(result);
+            } else {
+                res.status(404).json({
+                    message: 'Pokemon could not be found.'
+                })
+            }
+            
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err
+        })
+
+    })
+})
+
+
 //delete user
 router.delete('/:userId', (req, res, next) => {
     const Id = req.params.userId;
@@ -667,21 +819,35 @@ router.delete('/:userId', (req, res, next) => {
         });
 })
 
+router.delete('/:userId/pokemon/:pokemonId', (req, res, next) => {
+    Pokemon.findOneAndDelete({$and: [{_id: {$eq: req.params.pokemonId}}, {owner: {$eq: req.params.userId}}]})
+    .exec()
+    .then(result => {
+        if (result) {
+            res.status(200).json(result)
+        } else {
+            res.status(404).json({
+                message: 'Pokemon not found.'
+            })
+        }
+    })
+})
+
 async function getPokeMoves(pokeMoves, movesArray) {
     
     for (const pokeMove of pokeMoves) {
-        // console.log(pokeMove + ' the move.');
+        console.log(pokeMove + ' the move.');
         let body = await rp('https://pokeapi.co/api/v2/move/' + pokeMove);
         const moveData = await JSON.parse(body);
 
         //see if move is already known in database, if it is then add id to array
         //if not then api call for move info and create move.
-        Move.findOne({name: pokeMove})
+        await Move.findOne({name: pokeMove})
         .exec()
         .then( async queriedMove => {
             if (queriedMove != null){
                 console.log(queriedMove.name + ' is already in the database! :), its ID: ' + queriedMove._id)
-                movesArray.push(queriedMove._id);
+                await movesArray.push(queriedMove._id);
             } else {
                 const move = await Move({
                     _id: new mongoose.Types.ObjectId,
@@ -691,10 +857,9 @@ async function getPokeMoves(pokeMoves, movesArray) {
                     accuracy: moveData.accuracy,
                     power: moveData.power
                 })
-                move.save()
+                await move.save()
                     .then(result => {
                         movesArray.push(result._id);
-                        // console.log(result + 'movesupdate');
                     });
             }
         })

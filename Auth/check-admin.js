@@ -9,15 +9,19 @@ module.exports = (req, res, next) => {
             if (result.isAdmin) {
                 next();
             } else {
-                return res.satus(401).json({
+                    res.status(401).json({
                     message: 'Unauthorized.'
                 });
             }
+        } else {
+            res.satus(401).json({
+                message: 'Unauthorized.'
+            });
         }
     })
     .catch(err => {
         return res.status(500).json({
-            message: err
+            error: err
         })
     })
     

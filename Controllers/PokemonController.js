@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 
 exports.get_all_pokemon = (req, res, next) => {
     Pokemon.find()
+    .populate('owner', 'name ')
     .select('name nickName')
     .exec()
     .then(obj => {
@@ -13,9 +14,9 @@ exports.get_all_pokemon = (req, res, next) => {
                 count: obj.length,
                 pokemon: obj.map( obj => {
                     return {
-                        name: obj.name,
-                        nickName: obj.nickName,
                         _id: obj._id,
+                        name: obj.name,
+                        owner: obj.owner,
                         url: req.protocol + '://' + req.get('host') + req.originalUrl + '/' + obj._id
                     }
                 })
