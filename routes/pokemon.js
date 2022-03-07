@@ -17,6 +17,6 @@ router.post('/', checkAuth, checkAdmin, PokemonController.create_pokemon);
 router.patch('/:pokemonId', checkAuth, checkAdmin, PokemonController.edit_pokemon);
 
 //delete pokemon
-router.delete('/:pokemonId', checkAuth, checkAdmin, PokemonController.delete_pokemon);
+router.delete('/:pokemonId', /*checkAuth, checkAdmin,*/ PokemonController.delete_pokemon);
 
 module.exports = router;

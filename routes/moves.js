@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const Move = require('../models/move');
+const mongoose = require('mongoose');
+const checkAuth = require('../Auth/check-auth');
+const checkAdmin = require('../Auth/check-admin');
 
 //get all moves
 router.get('/', (req, res, next) => {
@@ -45,4 +48,64 @@ router.get('/:moveId', (req, res, next) => {
     })
 })
 
+router.post('/new', checkAuth, checkAdmin, (req, res, next) => {
+    const move = Move({
+        _id: new mongoose.Types.ObjectId,
+        name: req.body.name,
+        description: req.body.description,
+        type: req.body.type,
+        accuracy: req.body.accuracy,
+        power: req.body.power
+    })
+    move.save()
+    .then(result => {
+        console.log(result);
+
+        res.status(201).json({
+            message: "Move: \`" + move.name + "\` has been created.",
+            url: req.protocol + '://' + req.get('host') + req.baseUrl + '/' + move._id
+        });
+    })
+    .catch(err => res.status(500).json({
+        error: err
+    }))
+
+})
+
+
+router.patch('/:moveId', checkAuth, checkAdmin, (req, res, next) => {
+    const moveId = req.params.moveId;
+    Move.findByIdAndUpdate(moveId, {$set:req.body}, {new:true})
+    .select('-__v')
+    .exec()
+    .then( move => {
+        if (move) {
+            res.status(201).json(move)
+            //TODO: finish move update.
+        } else {
+            res.status(500).json({
+                message: `No move found with ID: ${moveId}.`
+            })
+        }
+    })
+    .catch( err => {
+        res.status(500).json({
+            error: err
+        })
+    })
+})
+
+router.delete('/:moveId', checkAuth, checkAdmin, async (req, res, next) => {
+    const moveId = req.params.moveId;
+
+    const move = await Move.findOne({_id: moveId})
+    if (move) {
+        move.deleteOne();
+             res.status(200).json({
+                 message: `${move.name} has been deleted.`
+             })
+    } else {
+        req.status(404).json({message: `No move found for ID: ${moveId}.`})
+    }
+})
 module.exports = router;

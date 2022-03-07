@@ -68,7 +68,6 @@ router.get('/:id', (req, res, next) => {
     })
 })
 
-
 //create battles
 router.post('/', checkAuth, checkAdmin, (req, res, next) => {
     const battle = Battle({

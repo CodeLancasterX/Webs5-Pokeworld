@@ -1,5 +1,6 @@
 const Pokemon = require('../models/pokemon');
 const mongoose = require('mongoose');
+const User = require('../models/user');
 
 exports.get_all_pokemon = (req, res, next) => {
     Pokemon.find()
@@ -117,19 +118,15 @@ exports.edit_pokemon = (req, res, next) => {
     });
 }
 
-exports.delete_pokemon = (req, res, next) => {
-    const id = req.params.pokemonId;
-    Pokemon.remove({ _id: id })
-    .exec()
-    .then( result => {
-        console.log(result)
-        res.status(200).json({
-            message: "Pokemon has succesfully been deleted."
-        });
-    })
-    .catch( err => {
-        res.status(500).json({
-            error: err
-        })
-    });
+exports.delete_pokemon = async (req, res, next) => {
+    const pokemonId = req.params.pokemonId;
+    const pokemon = await Pokemon.findById(pokemonId);
+    if (pokemon) {
+        pokemon.deleteOne();
+             res.status(200).json({
+                 message: `${pokemon.name} has been deleted.`
+             })
+    } else {
+        req.status(404).json({message: `No pokemon found for ID: ${pokemonId}.`})
+    }
 }

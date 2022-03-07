@@ -1,4 +1,6 @@
+const res = require('express/lib/response');
 const mongoose = require('mongoose');
+const User = require('./user');
 
 pokemonSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
@@ -14,5 +16,20 @@ pokemonSchema = mongoose.Schema({
     moves: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Move' }],
     imageUrl: { type: String, required: false }
 });
+
+pokemonSchema.pre('deleteOne', {document:true}, function(next) {
+    User.findOneAndUpdate(
+        { _id: this.owner}, 
+        { $pull: { caughtPokemon: this._id }},
+        {new:true})
+    .exec()
+    .then( result => {console.log(result)})
+    .catch( err => {
+        res.status(500).json({
+            error: err
+        })
+    })
+    next();
+})
 
 module.exports = mongoose.model('Pokemon', pokemonSchema);

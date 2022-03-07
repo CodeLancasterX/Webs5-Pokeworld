@@ -12,6 +12,7 @@ const jwt = require('jsonwebtoken');
 const request = require('request');
 const rp = require('request-promise');
 const pokemon = require('../models/pokemon');
+const checkAdmin = require('../Auth/check-admin');
 
 //get users
 router.get('/', (req, res, next) => {
@@ -68,6 +69,39 @@ router.get('/:userId', (req, res, next) => {
                 error: err
             });
         });
+})
+
+router.get('/:userId/encounters', checkAuth, (req, res, next) => {
+
+    Encounter.find({user: req.userData.userId})
+    .exec()
+    .then( encounters => {
+        if (encounters.length > 0) {
+
+            const response = {
+                count: encounters.length,
+                encounters: encounters.map( obj => {
+                    return {
+                        _id: obj._id,
+                        trainer: obj.user,
+                        pokemon: obj.pokemon,
+                        caught: obj.caught
+                    }
+                })
+            }
+
+            res.status(200).json({
+                response
+            })
+        } else {
+            res.status(500).json({message: 'No encounters found for this user.'})
+        }
+    })
+    .catch( err => {
+        res.status(500).json({
+            error: err
+        })
+    })
 })
 
 //get user owned pokemon
@@ -221,7 +255,7 @@ router.post('/signup', (req, res, next) => {
                         })
                     } else {
                         //poke api does not give starter data and other api's are not functional anymore.
-                        // using hardcoded starterOptions instead of starter boolean.
+                        // admin can create pokemon with starter true to define starter pokemon.
                         const starter = req.body.pokemon;
                         Pokemon.findOne({
                                 $and: [{
@@ -427,7 +461,7 @@ router.patch('/:userId/encounters/:encounterId', /* check-auth, */ (req, res, ne
         .exec()
         .then(encounterData => {
             if (encounterData) {
-
+                if (encounterData.user == req.params.userId) {
                 if (encounterData.caught) {
                     res.status(200).json({
                         message: 'Cannot update encounter where pokemon has already been caught.'
@@ -545,6 +579,11 @@ router.patch('/:userId/encounters/:encounterId', /* check-auth, */ (req, res, ne
                             })
                         })
                 } //check
+            } else {
+                res.status(400).json({
+                    message: "Cannot update encounter of another user."
+                })
+            }
             } else {
                 res.status(404).json({
                     message: 'Encounter could not be found.'
@@ -797,9 +836,8 @@ router.patch('/:userId/pokemon/:pokemonId', (req, res, next) => {
     })
 })
 
-
 //delete user
-router.delete('/:userId', (req, res, next) => {
+router.delete('/:userId', checkAuth, checkAdmin, (req, res, next) => {
     const Id = req.params.userId;
     User.remove({
             _id: Id
@@ -819,18 +857,17 @@ router.delete('/:userId', (req, res, next) => {
         });
 })
 
-router.delete('/:userId/pokemon/:pokemonId', (req, res, next) => {
-    Pokemon.findOneAndDelete({$and: [{_id: {$eq: req.params.pokemonId}}, {owner: {$eq: req.params.userId}}]})
-    .exec()
-    .then(result => {
-        if (result) {
-            res.status(200).json(result)
-        } else {
-            res.status(404).json({
-                message: 'Pokemon not found.'
-            })
-        }
-    })
+router.delete('/:userId/pokemon/:pokemonId', async (req, res, next) => {
+
+    const pokemon = await Pokemon.findOne({$and: [{_id: {$eq: req.params.pokemonId}}, {owner: {$eq: req.params.userId}}]})
+    if (pokemon) {
+        pokemon.deleteOne();
+             res.status(200).json({
+                 message: `${pokemon.name} has been deleted.`
+             })
+    } else {
+        req.status(404).json({message: "No pokemon found."})
+    }
 })
 
 async function getPokeMoves(pokeMoves, movesArray) {
