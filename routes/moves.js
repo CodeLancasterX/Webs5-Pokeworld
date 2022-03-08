@@ -1,7 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const Move = require('../models/move');
-const mongoose = require('mongoose');
 const checkAuth = require('../auth/check-auth');
 const checkAdmin = require('../auth/check-admin');
 const MoveController = require('../controllers/moveController')

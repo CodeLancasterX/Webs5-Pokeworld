@@ -15,8 +15,12 @@ const app = express();
 connectMongoDB().catch(err => console.log(err));
 
 async function connectMongoDB() {
-  await mongoose.connect(process.env.MongoDBConnectionString);
+  await mongoose.connect(process.env.MongoDBConnectionString, { useNewUrlParser: true});
 }
+const connection = mongoose.connection;
+connection.once('open', () => {
+    console.log("MongoDB database connection established successfully");
+})
  
 app.use(morgan('dev'));
 //recognise incoming requests as string or body.

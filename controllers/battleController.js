@@ -1,5 +1,8 @@
 const Battle = require('../models/battle');
 const mongoose = require('mongoose');
+const Battle = require('../models/battle');
+const User = require('../models/user');
+const mongoose = require('mongoose');
 
 exports.get_all_battles = (req, res, next) => {
 

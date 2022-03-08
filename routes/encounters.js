@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const Encounter = require('../models/encounter');
 const EncounterController = require('../controllers/encounterController');
 
 router.get('/', EncounterController.get_all_encounters);

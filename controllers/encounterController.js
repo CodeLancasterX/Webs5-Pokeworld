@@ -1,5 +1,6 @@
 const Encounter = require('../models/encounter');
 const mongoose = require('mongoose');
+const Encounter = require('../models/encounter');
 
 exports.get_all_encounters = (req, res, next) => {
     Encounter.find()

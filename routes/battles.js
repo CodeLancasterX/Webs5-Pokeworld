@@ -1,13 +1,8 @@
 const express = require('express');
-const Battle = require('../models/battle');
-const User = require('../models/user');
 const checkAdmin = require('../auth/check-admin');
-const mongoose = require('mongoose');
 const checkAuth = require('../auth/check-auth');
 const BattleController = require('../controllers/battleController')
 const router = express.Router();
-
-
 
 //get battles
 router.get('/', BattleController.get_all_battles); 

@@ -1,10 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const checkAuth = require('../auth/check-auth');
-const BattleRequest = require('../models/battleRequest');
-const BattleRequestController = require('../controllers/battleRequestController')
-const Battle = require('../models/battle');
-const User = require('../models/user');
+const BattleRequestController = require('../controllers/battleRequestController');
 const router = express.Router();
 
 
