@@ -37,7 +37,17 @@ app.use((req, res, next) => {
     next();
 })
 
-app.use('/', baseRoute)
+// app.use('/', baseRoute);
+
+app.get('/', (req, res) => {
+    const pokeWorldRoutes = {
+        routes: [{userRoutes: ['get_all_users: / ', 'get_user_by_id: /:id', 'get_encounter_by_userId: /:userId/encounters' ]}]
+    }
+
+    res.status(200).json({
+         pokeWorldRoutes
+    })
+})
 app.use('/users', userRoutes);
 app.use('/pokemon', pokemonRoutes);
 app.use('/battles', battleRoutes);
