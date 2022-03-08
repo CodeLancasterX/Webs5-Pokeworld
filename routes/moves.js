@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 const Move = require('../models/move');
 const mongoose = require('mongoose');
-const checkAuth = require('../Auth/check-auth');
-const checkAdmin = require('../Auth/check-admin');
-const MoveController = require('../Controllers/moveController')
+const checkAuth = require('../auth/check-auth');
+const checkAdmin = require('../auth/check-admin');
+const MoveController = require('../controllers/moveController')
 
 router.get('/', MoveController.get_all_moves)
 

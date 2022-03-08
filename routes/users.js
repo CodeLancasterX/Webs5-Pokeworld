@@ -7,13 +7,13 @@ const Pokemon = require('../models/pokemon');
 const Battle = require('../models/battle');
 const Encounter = require('../models/encounter');
 const Move = require('../models/move');
-const checkAuth = require('../Auth/check-auth');
+const checkAuth = require('../auth/check-auth');
 const jwt = require('jsonwebtoken');
 const request = require('request');
 const rp = require('request-promise');
 const pokemon = require('../models/pokemon');
-const checkAdmin = require('../Auth/check-admin');
-const UserController = require('../Controllers/userController')
+const checkAdmin = require('../auth/check-admin');
+const UserController = require('../controllers/userController')
 
 
 router.get('/', UserController.get_all_users);
