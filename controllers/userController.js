@@ -1,5 +1,14 @@
 const User = require('../models/user');
 const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken');
+const request = require('request');
+const rp = require('request-promise');
+const pokemon = require('../models/pokemon');
+const bcrypt = require('bcrypt');
+const Pokemon = require('../models/pokemon');
+const Battle = require('../models/battle');
+const Encounter = require('../models/encounter');
+const Move = require('../models/move');
 
 //get users
 exports.get_all_users = (req, res, next) => {

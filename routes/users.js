@@ -1,17 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/user');
-const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
-const Pokemon = require('../models/pokemon');
-const Battle = require('../models/battle');
-const Encounter = require('../models/encounter');
-const Move = require('../models/move');
 const checkAuth = require('../auth/check-auth');
-const jwt = require('jsonwebtoken');
-const request = require('request');
-const rp = require('request-promise');
-const pokemon = require('../models/pokemon');
 const checkAdmin = require('../auth/check-admin');
 const UserController = require('../controllers/userController')
 
