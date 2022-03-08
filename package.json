@@ -9,13 +9,13 @@
     "node-fetch": "2.0",
     "request": "^2.88.2",
     "request-promise": "^4.2.6",
-    "validator": "^13.7.0"
+    "validator": "^13.7.0",
+    "nodemon": "^2.0.15"
   },
   "scripts": {
     "start": "nodemon server.js"
   },
   "devDependencies": {
-    "morgan": "^1.10.0",
-    "nodemon": "^2.0.15"
+    "morgan": "^1.10.0"
   }
 }
