@@ -11,4 +11,4 @@ router.get('/', (req, res, next) => {
     })
 })
 
-modeule.exports = router;
+module.exports = router;
