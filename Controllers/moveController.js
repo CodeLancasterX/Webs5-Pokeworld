@@ -65,7 +65,6 @@ exports.create_move =  (req, res, next) => {
     .catch(err => res.status(500).json({
         error: err
     }))
-
 }
 
 exports.update_move_by_id = (req, res, next) => {
