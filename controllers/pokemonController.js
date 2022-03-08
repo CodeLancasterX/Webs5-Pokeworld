@@ -1,6 +1,5 @@
 const Pokemon = require('../models/pokemon');
 const mongoose = require('mongoose');
-const User = require('../models/user');
 
 exports.get_all_pokemon = (req, res, next) => {
     Pokemon.find()
