@@ -1,7 +1,7 @@
 const express = require('express');
-const checkAuth = require('../Auth/check-auth');
-const checkAdmin = require('../Auth/check-admin');
-const PokemonController = require('../Controllers/pokemonController');
+const checkAuth = require('../auth/check-auth');
+const checkAdmin = require('../auth/check-admin');
+const PokemonController = require('../controllers/pokemonController');
 const router = express.Router();
 
 //get pokemon
