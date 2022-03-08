@@ -2,7 +2,6 @@ const BattleRequest = require('../models/battleRequest');
 const mongoose = require('mongoose');
 const Battle = require('../models/battle');
 const User = require('../models/user');
-const BattleRequest = require('../models/battleRequest');
 
 exports.get_all_battleRequests = (req, res, next) => {
     BattleRequest.find()
