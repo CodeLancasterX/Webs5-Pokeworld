@@ -10,6 +10,7 @@ const battleRequestRoutes = require('./routes/battleRequests');
 const encounterRoutes = require('./routes/encounters');
 const moveRoutes = require('./routes/moves');
 const baseRoute = require('./routes/baseRoute');
+const helpRoute = require('./routes/help');
 const app = express();
 
 connectMongoDB().catch(err => console.log(err));
@@ -42,6 +43,7 @@ app.use((req, res, next) => {
 })
 
 app.use('/', baseRoute);
+app.use('/help', helpRoute);
 app.use('/users', userRoutes);
 app.use('/pokemon', pokemonRoutes);
 app.use('/battles', battleRoutes);
