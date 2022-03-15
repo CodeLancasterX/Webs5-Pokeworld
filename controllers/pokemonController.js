@@ -17,7 +17,7 @@ exports.get_all_pokemon = (req, res, next) => {
                         _id: obj._id,
                         name: obj.name,
                         owner: obj.owner,
-                        url: req.protocol + '://' + req.get('host') + req.originalUrl + '/' + obj._id
+                        url: req.protocol + '://' + req.get('host') + req.originalUrl + obj._id
                     }
                 })
             }
@@ -42,7 +42,7 @@ exports.get_pokemon_by_Id = (req, res, next) => {
     const id = req.params.pokemonId;
     Pokemon.findById(id)
     .populate('moves', 'name power')
-    .select('pokemonId name nickName owner type weight height description moves imageUrl')
+    .select('-_v')
     .exec()
     .then( obj => {
         console.log(obj)
@@ -61,6 +61,39 @@ exports.get_pokemon_by_Id = (req, res, next) => {
     });
 }
 
+exports.get_all_starter_pokemon = (req, res, next) => {
+    Pokemon.find({starter: true})
+    .select('name')
+    .exec()
+    .then(obj => {
+        if (obj.length >= 1){
+
+            const response = {
+                count: obj.length,
+                pokemon: obj.map( obj => {
+                    return {
+                        _id: obj._id,
+                        name: obj.name,
+                        url: req.protocol + '://' + req.get('host') + req.baseUrl + '/' + obj._id
+                    }
+                })
+            }
+            res.status(200).json(response);
+
+        } else {
+            res.status(200).json({
+                message: 'No starters available.'
+            })
+        }
+    })
+    .catch( err => {
+        console.log(err);
+        res.status(500).json({
+            error: err
+        });
+    });
+}
+
 exports.create_pokemon = (req, res, next) => {
     const pokemon = new Pokemon({
         _id: new mongoose.Types.ObjectId,
@@ -72,7 +105,7 @@ exports.create_pokemon = (req, res, next) => {
         console.log(result);
 
         res.status(201).json({
-            message: "Pokemon: \`"+ pokemon.name + "\` has been created",
+            message: "Pokemon: \`"+ pokemon.name + "\` has been created.",
             url: req.protocol + '://' + req.get('host') + req.originalUrl + '/' + pokemon._id
         });
     })
@@ -85,7 +118,7 @@ exports.create_pokemon = (req, res, next) => {
 
 }
 
-exports.edit_pokemon = (req, res, next) => {
+exports.update_pokemon_by_id = (req, res, next) => {
     const id = req.params.pokemonId;
 
     Pokemon.updateOne({ _id: id }, {$set: {

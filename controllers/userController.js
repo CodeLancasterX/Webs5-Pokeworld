@@ -12,7 +12,6 @@ const Move = require('../models/move');
 
 //get users
 exports.get_all_users = (req, res, next) => {
-    console.log('accessed.')
     User.find()
         .select('name')
         .exec()

@@ -6,6 +6,11 @@ router.get('/', EncounterController.get_all_encounters);
 
 router.get('/:id', EncounterController.get_encounter_by_id);
 
-//Could make more routes, but it doesnt make sense in the context of this api.
+router.post('/new', EncounterController.create_encounter);
 
+router.patch('/:encounterId', EncounterController.update_encounter);
+
+router.delete('/:id', EncounterController.delete_encounter_by_id);
+
+//post patch delete routes were only made for the rubric.
 module.exports = router;

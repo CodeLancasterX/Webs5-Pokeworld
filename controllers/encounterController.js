@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Encounter = require('../models/encounter');
 
 exports.get_all_encounters = (req, res, next) => {
@@ -37,7 +38,7 @@ exports.get_all_encounters = (req, res, next) => {
 exports.get_encounter_by_id = (req, res, next) => {
     const encounterId = req.params.id;
     
-    Encounter.findById(encounterId)
+    Encounter.findOne({_id: encounterId})
     .select('id user pokemon.pokemonId pokemon.name pokemon.imageUrl pokemon.type pokemon.moves')
     .populate('user', 'name')
     .exec()
@@ -56,4 +57,62 @@ exports.get_encounter_by_id = (req, res, next) => {
             error: err
         })
     })
+}
+
+exports.create_encounter = (req, res, next) => {
+    const userId = req.userData.userId
+
+    const encounter = Encounter({
+        _id: new mongoose.Types.ObjectId,
+        user: userId,
+        pokemon: {
+            pokemonId: req.body.pokemonId,
+            name: req.body.name,
+            imageUrl: req.body.iamgeUrl,
+            type: req.body.type,
+            weight: req.body.weight,
+            height: req.body.height,
+            moves: req.body.moves
+        },
+        caught: req.body.caught
+    })
+    encounter.save()
+    .then( result => {
+        res.status(201).json({
+            message: "Encounter has been created.",
+            url: req.protocol + '://' + req.get('host') + req.originalUrl + '/' + encounter._id
+        });
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).json({ error: err});
+    })
+}
+
+exports.update_encounter = async (req, res, next) => {
+    const encounterId = req.params.encounterId;
+
+    const encounter = await Encounter.findOne({_id: encounterId})
+    if (encounter) {
+        encounter.updateOne({_id: encounterId}, {$set: req.body});
+             res.status(200).json({
+                 message: `${encounter.name} has been updated.`
+             })
+    } else {
+        req.status(404).json({message: `No move found for ID: ${encounterId}.`})
+    }
+}
+
+exports.delete_encounter_by_id = async (req, res, next) => {
+    const encounterId = req.params.encounterId;
+
+    const encounter = await Encounter.findOne({_id: encounterId})
+    if (encounter) {
+        encounter.updateOne({_id: encounterId}, {$set: req.body});
+             res.status(200).json({
+                 message: `${encounter.name} has been updated.`
+             })
+    } else {
+        req.status(404).json({message: `No move found for ID: ${encounterId}.`})
+    }
 }
