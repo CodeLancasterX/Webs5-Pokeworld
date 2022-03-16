@@ -115,7 +115,7 @@ exports.create_battleRequest = (req, res, next) => {
 //if accepted create new battle.
 exports.update_battleRequest_by_id = (req, res, next) => {
     //no new request may be made if one is still pending.
-    const id = req.userData._id;
+    const id = req.params.id;
     const status = req.body.status;
 
     BattleRequest.findById(id)
