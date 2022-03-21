@@ -8,3 +8,4 @@ const server = http.createServer(app);
 
 server.listen(port, () => console.log('server running'));
 
+module.exports = server
