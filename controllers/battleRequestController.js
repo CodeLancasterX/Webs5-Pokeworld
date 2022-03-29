@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const Battle = require('../models/battle');
 const User = require('../models/user');
 
-exports.get_all_battleRequests = (req, res, next) => {
+exports.get_all_battleRequests = async (req, res, next) => {
     BattleRequest.find()
     .select('_id challenger defender status')
     .populate('challenger defender', 'name')
@@ -34,7 +34,7 @@ exports.get_all_battleRequests = (req, res, next) => {
     })
 }
 
-exports.get_battleRequest_by_id = (req, res, next) => {
+exports.get_battleRequest_by_id = async (req, res, next) => {
     const id = req.params.id;
     BattleRequest.findById(id)
     .select('_id challenger defender status')
@@ -55,7 +55,7 @@ exports.get_battleRequest_by_id = (req, res, next) => {
     })
 }
 
-exports.create_battleRequest = (req, res, next) => {
+exports.create_battleRequest = async (req, res, next) => {
     User.findById(req.body.defender)
     .exec()
     .then( defenderData => {
@@ -113,7 +113,7 @@ exports.create_battleRequest = (req, res, next) => {
 }
 
 //if accepted create new battle.
-exports.update_battleRequest_by_id = (req, res, next) => {
+exports.update_battleRequest_by_id = async (req, res, next) => {
     //no new request may be made if one is still pending.
     const id = req.params.id;
     const status = req.body.status;
@@ -202,7 +202,7 @@ exports.update_battleRequest_by_id = (req, res, next) => {
     .catch( err => res.status(500).json({error: err}));   
 }
 
-exports.delete_battleRequest_by_id = (req, res, next) => {
+exports.delete_battleRequest_by_id = async (req, res, next) => {
     const id = req.params.id;
     BattleRequest.deleteOne({ _id: id })
     .exec()

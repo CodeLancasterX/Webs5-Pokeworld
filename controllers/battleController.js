@@ -27,7 +27,7 @@ exports.get_all_battles = (req, res, next) => {
 
             res.status(200).json(battle);
         } else {
-            res.status(200).json({ message: "No battles found."})
+            res.status(404).json({ message: "No battles found."})
         }
     })
     .catch( err => {
@@ -47,7 +47,7 @@ exports.get_battle_by_id = (req, res, next) => {
         if (result){
             res.status(200).json(result)
         } else {
-            res.status(200).json({message: 'No battle found for ID: ' + id})
+            res.status(404).json({message: 'No battle found for ID: ' + id})
         }
         
     })
@@ -105,7 +105,7 @@ exports.update_battle_by_id = (req, res, next) => {
                     
                     res.status(201).json(battle);
                 } else {
-                    res.status(200).json({message: 'Use \'winner\' in the body of the request.'})
+                    res.status(400).json({message: 'Use \'winner\' in the body of the request.'})
                 }
             })
         } else {
