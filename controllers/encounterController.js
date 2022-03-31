@@ -68,7 +68,7 @@ exports.create_encounter = (req, res, next) => {
         pokemon: {
             pokemonId: req.body.pokemonId,
             name: req.body.name,
-            imageUrl: req.body.iamgeUrl,
+            imageUrl: req.body.imageUrl,
             type: req.body.type,
             weight: req.body.weight,
             height: req.body.height,
