@@ -24,14 +24,14 @@ router.get('/:userId/battles', UserController.get_battles_by_userId)
 //create users
 router.post('/signup', UserController.sign_up)
 
+//login
+router.post('/login', UserController.login)
+
 //create encounter 
 router.post('/:userId/encounters/new', checkAuth, UserController.create_encounter)
 
 //update encounter
 router.patch('/:userId/encounters/:encounterId', checkAuth, UserController.update_encounter)
-
-//login
-router.patch('/login', UserController.login)
 
 //update users
 router.patch('/:userId', checkAuth, UserController.update_user_by_id)

@@ -73,6 +73,7 @@ exports.create_battle = (req, res, next) => {
 
         res.status(201).json({
             message: "Battle has been created.",
+            _id: battle._id,
             url: req.protocol + '://' + req.get('host') + req.originalUrl + '/' + battle._id
         });
     })
@@ -84,32 +85,32 @@ exports.create_battle = (req, res, next) => {
 
 exports.update_battle_by_id = (req, res, next) => {
     
-    const id = req.userData.userId;
-    const userId = req.body.winner;
-    User.findById(userId)
+    const battleId = req.body.battleId;
+    const winnerId = req.body.winner;
+    User.findById(winnerId)
     .exec()
     .then( result => {
         if (result) {
-            Battle.updateOne({_id: id}, {$set: {
-                winner: userId
+            Battle.updateOne({_id: battleId}, {$set: {
+                winner: winnerId
             }})
             .exec()
             .then( result => {
                 console.log(result);
-                if (userId) {
+                if (winnerId) {
                     const battle = {
-                        message: 'Battle with ID: '+ id + ' has been updated.',
-                        _id: id,
+                        message: 'Battle with ID: '+ battleId + ' has been updated.',
+                        _id: battleId,
                         url: req.protocol + '://' + req.get('host') + req.originalUrl
                     }
                     
                     res.status(201).json(battle);
                 } else {
-                    res.status(400).json({message: 'Use \'winner\' in the body of the request.'})
+                    res.status(400).json({message: 'Use the \'winner\' property in the body of the request.'})
                 }
             })
         } else {
-            res.status(404).json({message: 'User with ID: ' + id + ' could not be found.'})
+            res.status(404).json({message: 'User with ID: ' + winnerId + ' could not be found.'})
         }
     })
     .catch( err => {

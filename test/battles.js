@@ -1,11 +1,9 @@
 const chai = require('chai');
 const chaiHttp = require('chai-http');
-const {
-    response
-} = require('../app');
 const server = require('../server');
 const User = require('../models/user');
 const expect = chai.expect;
+
 
 //Assertion style
 chai.should();
@@ -21,33 +19,9 @@ const defaultUser = {
 
 
 let token;
+let battleId;
 
-describe("Battleroutetests", () => {
-    let agent = chai.request.agent(server);
-
-    // beforeEach(function(done) {
-    //     agent
-    //         .post('/users/signup')
-    //         .send(defaultUser)
-    //         .end((err, res) => {
-    //             expect(err).to.be.null;
-    //             expect(res).to.have.status(201);
-    //             done();
-    //         });
-	// });
-
-    beforeEach(function(done) {
-        agent
-            .post('/users/login')
-            .send(defaultUser)
-            .end((err, res) => {
-                expect(err).to.be.null;
-                expect(res).to.have.status(200);
-                done();
-            });
-	});
-
-
+describe("User", () => {
     // await beforeEach(async done => {
     //     const response = await chai.request(server)
     //         .post("/users/signup")
@@ -55,17 +29,11 @@ describe("Battleroutetests", () => {
     //     done();
     //     response.should.have.status(201);
     // }, 10000)
+    
 
-    // await beforeEach(async done => {
-    //     const response = await chai.request(server)
-    //         .post("/users/login")
-    //         .send(defaultUser)
-    //     token = res.body.token;
-    //     response.should.have.status(200);
-    //     done();
-    // });
 
-    // afterEach( function(done) {
+
+    // await afterEach(async (done) => {
     //     // After each test we truncate the database
     //     User.deleteOne({
     //         email: defaultUser.email
@@ -73,16 +41,36 @@ describe("Battleroutetests", () => {
     //         console.log('check.')
     //     });
     //     done();
-    // });
+    // }, 10000);
+    let agent = chai.request.agent(server);
+
+    beforeEach( function(done){
+        agent
+            .post("/users/login")
+            .send(defaultUser)
+            
+            .end((err, res) => {
+                expect(err).to.be.null;
+                expect(res).to.have.status(200);
+                // console.log(token)
+                // console.log(res.body)
+                res.should.have.status(200);
+                token = res.body.token;
+                done();
+            });
+
+    });
 
     describe('Battleroutes', () => {
+
+
 
         /**
          * Test GET route.
          */
         describe('GET /battles', () => {
-            it('It should GET all battles with status 200.', (done) => {
-                chai.request(server)
+            it('It should GET all battles.', (done) => {
+                agent
                     .get('/battles')
                     .end((err, response) => {
                         response.should.have.status(200);
@@ -90,19 +78,19 @@ describe("Battleroutetests", () => {
                         response.body.battles.length.should.be.eq(response.body.count);
                         done();
                     })
-            }).timeout(10000);
-        });
+            })
+        })
 
         describe('GET /battles', () => {
-            it('It should NOT GET all battles with status 404.', (done) => {
-                chai.request(server)
+            it('It should NOT GET all battles.', (done) => {
+                agent
                     .get('/battle')
                     .end((err, response) => {
                         response.should.have.status(404);
                         done();
                     })
             })
-        }, 10000)
+        })
 
         /**
          * Test GET /:id route.
@@ -110,7 +98,7 @@ describe("Battleroutetests", () => {
         describe('GET /battles/:id', () => {
             it('It should GET a battle by ID.', (done) => {
                 const id = '6231af3fad6e38e97fa54f88'
-                chai.request(server)
+                agent
                     .get('/battles/' + id)
                     .end((err, response) => {
                         response.should.have.status(200);
@@ -138,7 +126,7 @@ describe("Battleroutetests", () => {
         describe('GET /battles/:id', () => {
             it('It should NOT GET a battle by ID for invalid ID.', (done) => {
                 const id = '6231af3fad6e38e97fa54f87'
-                chai.request(server)
+                agent
                     .get('/battles/' + id)
                     .end((err, response) => {
                         response.should.have.status(404);
@@ -151,15 +139,17 @@ describe("Battleroutetests", () => {
          * Test POST route.
          */
         describe('POST /battles', () => {
-            it('It should POST a new battle.',(done) => {
-                const response = chai.request(server)
+            it('It should CREATE a new battle.', (done) => {
+                const defender = '621993e4ce59ffa0a0b4052e'
+                agent
                     .post('/battles')
-                    .set({
-                        Authorization: `Bearer ${token}`
-                    })
-
-                    response.should.have.status(201);
-                    done();
+                    .send({token: token, challenger: defaultUser._id, defender: defender, winner: null})
+                    .end((err, res) => {
+                        expect(err).to.be.null;
+                        expect(res).to.have.status(201);
+                        battleId = res.body._id;
+                        done();
+                    });
 
             })
         })
@@ -167,11 +157,33 @@ describe("Battleroutetests", () => {
         /**
          * Test PATCH route.
          */
-
+        describe('PATCH /battles/:id', () => {
+            it('It should EDIT a battle.', (done) => {
+                agent
+                    .patch('/battles/:id')
+                    .send({token: token, winner: defaultUser._id, battleId: battleId})
+                    .end((err, res) => {
+                        expect(err).to.be.null;
+                        expect(res).to.have.status(201);
+                        done();
+                    });
+            })
+        })
 
         /**
          * Test DELETE route.
          */
-
+         describe('DELETE /battles/:id', () => {
+            it('It should DELETE a battle.', (done) => {
+                agent
+                    .delete(`/battles/${battleId}`)
+                    .send({token: token})
+                    .end((err, res) => {
+                        expect(err).to.be.null;
+                        expect(res).to.have.status(200);
+                        done();
+                    });
+            })
+        })
     })
 })

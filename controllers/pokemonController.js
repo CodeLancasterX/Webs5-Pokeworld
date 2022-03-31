@@ -17,7 +17,7 @@ exports.get_all_pokemon = (req, res, next) => {
                         _id: obj._id,
                         name: obj.name,
                         owner: obj.owner,
-                        url: req.protocol + '://' + req.get('host') + req.originalUrl + obj._id
+                        url: req.protocol + '://' + req.get('host') + req.originalUrl + '/' + obj._id
                     }
                 })
             }
