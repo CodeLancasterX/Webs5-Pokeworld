@@ -6,7 +6,7 @@ router.get('/', EncounterController.get_all_encounters);
 
 router.get('/:id', EncounterController.get_encounter_by_id);
 
-router.post('/new', EncounterController.create_encounter);
+router.post('/', EncounterController.create_encounter);
 
 router.patch('/:encounterId', EncounterController.update_encounter);
 

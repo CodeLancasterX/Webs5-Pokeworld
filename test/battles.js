@@ -158,7 +158,7 @@ describe("User", () => {
          * Test PATCH route.
          */
         describe('PATCH /battles/:id', () => {
-            it('It should EDIT a battle.', (done) => {
+            it('It should UPDATE a battle so that there is a winner.', (done) => {
                 agent
                     .patch('/battles/:id')
                     .send({token: token, winner: defaultUser._id, battleId: battleId})
