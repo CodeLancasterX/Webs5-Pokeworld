@@ -1,5 +1,9 @@
 const mongoose = require('mongoose');
 const Encounter = require('../models/encounter');
+const User = require('../models/user');
+const userController = require('../controllers/userController');
+const request = require('request');
+const Pokemon = require('../models/pokemon');
 
 exports.get_all_encounters = (req, res, next) => {
     Encounter.find()
@@ -59,56 +63,61 @@ exports.get_encounter_by_id = (req, res, next) => {
 }
 
 exports.create_encounter = (req, res, next) => {
-    console.log('yes');
     const userId = req.userData.userId
-    
-    console.log(userId);
-    const encounter = Encounter({
-        _id: new mongoose.Types.ObjectId,
-        user: userId,
-        pokemon: {
-            pokemonId: req.body.pokemonId,
-            name: req.body.name,
-            imageUrl: req.body.imageUrl,
-            type: req.body.type,
-            weight: req.body.weight,
-            height: req.body.height,
-            moves: req.body.moves
-        },
-        caught: req.body.caught
+
+    User.findById(userId)
+    .exec()
+    .then( user => {
+        if (user) {
+            const encounter = Encounter({
+                _id: new mongoose.Types.ObjectId,
+                user: userId,
+                pokemon: {
+                    pokemonId: req.body.pokemon.pokemonId,
+                    name: req.body.pokemon.name,
+                    imageUrl: req.body.pokemon.imageUrl,
+                    type: req.body.pokemon.type,
+                    weight: req.body.pokemon.weight,
+                    height: req.body.pokemon.height,
+                    moves: req.body.pokemon.moves
+                },
+                caught: req.body.caught
+            })
+            encounter.save()
+            .then( result => {
+                res.status(201).json({
+                    _id: encounter._id,
+                    message: "Encounter has been created.",
+                    url: req.protocol + '://' + req.get('host') + req.originalUrl + '/' + encounter._id
+                });
+            })
+            .catch(err => {
+                console.log(err);
+                res.status(500).json({ error: err});
+            })
+        } else {
+            res.status(404).json({
+                message: `No users found for ID: ${this.user}.`
+            });
+        }
     })
-    encounter.save()
-    .then( result => {
-        res.status(201).json({
-            message: "Encounter has been created.",
-            url: req.protocol + '://' + req.get('host') + req.originalUrl + '/' + encounter._id
+    .catch( err => {
+        res.status(500).json({
+            error: err
         });
     })
-    .catch(err => {
-        console.log(err);
-        res.status(500).json({ error: err});
-    })
+    
+
 }
 
 exports.update_encounter = async (req, res, next) => {
     const encounterId = req.params.encounterId;
 
-    // const encounter = await Encounter.findOne({_id: encounterId})
-    // if (encounter) {
-    //     encounter.updateOne({_id: encounterId}, {$set: req.body});
-    //          res.status(200).json({
-    //              message: `${encounter.name} has been updated.`
-    //          })
-    // } else {
-    //     req.status(404).json({message: `No move found for ID: ${encounterId}.`})
-    // }
-
-
     Encounter.findById(encounterId)
             .exec()
             .then(encounterData => {
                 if (encounterData) {
-                    if (encounterData.user == user._id) {
+                    if (encounterData.user != req.userData._id) {
                     if (encounterData.caught) {
                         res.status(200).json({
                             message: 'Cannot update encounter where pokemon has already been caught.'
@@ -131,23 +140,23 @@ exports.update_encounter = async (req, res, next) => {
                                     pokemon: encounterData.pokemon,
                                     caught: caught
                                 }
-                                
+
                                 if (result.modifiedCount >= 1) {
     
                                     //if pokemon is caught create a new Pokemon and udpate  
                                         //Get move info, create new move object, set new pokemon property moves to 
                                         const movesArray = [];
-                                        await getPokeMoves(encounter.pokemon.moves, movesArray).then(result => {
+                                        await userController.getPokeMoves(encounter.pokemon.moves, movesArray).then(result => {
                                             // console.log(result + ' getpokemoves');
                                         }).catch(err => {
                                             console.log(err);
                                         });
-                                    
+
                                     if (encounter.pokemon.name == 'squirtle' || encounter.pokemon.name == 'charmander' || encounter.pokemon.name == 'bulbasaur') {
                                         encounter.pokemon.starter = true;
                                     }
+
                                     request('https://pokeapi.co/api/v2/pokemon-species/' + encounter.pokemon.name, async (error, response, body) => {
-                                       
                                         const speciesData = JSON.parse(body);
                                         let pokemonDescription = '';
                                         
@@ -157,7 +166,7 @@ exports.update_encounter = async (req, res, next) => {
                                                 break;
                                             }
                                         }
-    
+
                                         const pokemon = Pokemon({
                                             _id: new mongoose.Types.ObjectId,
                                             pokemonId: encounter.pokemon.pokemonId,
@@ -172,6 +181,7 @@ exports.update_encounter = async (req, res, next) => {
                                             moves: movesArray,
                                             imageUrl: encounter.pokemon.imageUrl
                                         })
+
                                         pokemon.save()
                                             .then(result => {
                                                 // console.log(pokemon._id)
@@ -202,14 +212,7 @@ exports.update_encounter = async (req, res, next) => {
                                                     error: err
                                                 })
                                             })
-    
-                                        
-                                        
-    
                                     })
-                                    
-    
-    
     
                                 } else if (!encounter.caught && result.matchedCount == 1) {
                                     //if pokemon is not caught but the encounterId exists then tell user it got away.
@@ -248,15 +251,15 @@ exports.update_encounter = async (req, res, next) => {
 }
 
 exports.delete_encounter_by_id = async (req, res, next) => {
-    const encounterId = req.params.encounterId;
-
+    const encounterId = req.params.id;
+    console.log(encounterId)
     const encounter = await Encounter.findOne({_id: encounterId})
     if (encounter) {
-        encounter.updateOne({_id: encounterId}, {$set: req.body});
+        encounter.deleteOne({_id: encounterId});
              res.status(200).json({
-                 message: `${encounter.name} has been updated.`
+                 message: `${encounter.name} has been deleted.`
              })
     } else {
-        req.status(404).json({message: `No move found for ID: ${encounterId}.`})
+        req.status(404).json({message: `No encounter found for ID: ${encounterId}.`})
     }
 }

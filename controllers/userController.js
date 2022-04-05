@@ -1068,7 +1068,7 @@ exports.delete_pokemon_by_userId = async (req, res, next) => {
 }
 
 
-async function getPokeMoves(pokeMoves, movesArray) {
+exports.getPokeMoves = async function getPokeMoves(pokeMoves, movesArray) {
     
     for (const pokeMove of pokeMoves) {
         console.log(pokeMove + ' the move.');

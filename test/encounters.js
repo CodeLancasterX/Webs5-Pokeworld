@@ -3,10 +3,6 @@ const chaiHttp = require('chai-http');
 const server = require('../server');
 const expect = chai.expect;
 
-
-//Assertion style
-chai.should();
-
 chai.use(chaiHttp);
 
 //create jwt token authentication.
@@ -104,9 +100,9 @@ describe("User", () => {
                     .end((err, response) => {
                         response.should.have.status(200);
                         response.body.should.be.a('object');
-                        // response.body.should.have.property('challenger');
-                        // response.body.should.have.property('defender');
-                        // response.body.should.have.property('winner');
+                        response.body.should.have.property('pokemon');
+                        response.body.should.have.property('_id');
+                        response.body.should.have.property('user');
                         done();
                     })
             })
@@ -142,7 +138,7 @@ describe("User", () => {
         describe('POST /encounters', () => {
             it('It should CREATE a new encounter.', (done) => {
                 agent
-                    .post('/encounters/')
+                    .post('/encounters')
                     .send({token: token,
                     pokemon: {
                         pokemonId: 1,
@@ -165,6 +161,9 @@ describe("User", () => {
                     .end((err, res) => {
                         expect(err).to.be.null;
                         expect(res).to.have.status(201);
+                        expect(res).to.have.property("_id");
+                        expect(res).to.have.property("message");
+                        expect(res).to.have.property("url");
                         encounterId = res.body._id;
                         done();
                     });
@@ -178,11 +177,16 @@ describe("User", () => {
         describe('PATCH /encounters/:id', () => {
             it('It should UPDATE an encounter so that a pokemon is caught.', (done) => {
                 agent
-                    .patch('/encounters/:id')
+                    .patch(`/encounters/${encounterId}`)
                     .send({token: token, encounterId: encounterId, caught: true})
                     .end((err, res) => {
                         expect(err).to.be.null;
                         expect(res).to.have.status(201);
+                        expect(res).to.have.property("userId");
+                        expect(res).to.have.property("pokemonId");
+                        expect(res).to.have.property("message");
+                        expect(res).to.have.property("update");
+                        expect(res).to.have.property("pokeUrl");
                         userId = res.body.userId;
                         done();
                     });
@@ -200,6 +204,7 @@ describe("User", () => {
                     .end((err, res) => {
                         expect(err).to.be.null;
                         expect(res).to.have.status(200);
+                        expect(res).to.have.property("message");
                         done();
                     });
             })
