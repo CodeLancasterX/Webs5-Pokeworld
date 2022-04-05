@@ -60,6 +60,45 @@ describe("User", () => {
 
     describe('Encounterroutes', () => {
 
+        /**
+         * Test POST route.
+         */
+            describe('POST /encounters', () => {
+            it('It should CREATE a new encounter.', (done) => {
+                agent
+                    .post('/encounters')
+                    .send({token: token,
+                    pokemon: {
+                        pokemonId: 1,
+                        name: "bulbasaur",
+                        imageUrl: "https://www.serebii.net/pokemongo/pokemon/001.png",
+                        type: [
+                            "grass",
+                            "poison"
+                        ],
+                        weight: 80,
+                        height: 9,
+                        moves: [
+                            "fury-cutter",
+                            "tackle",
+                            "outrage",
+                            "facade"
+                        ]
+                    },
+                    caught: false})
+                    .end((err, res) => {
+                        expect(err).to.be.null;
+                        // console.log(res)
+                        expect(res).to.have.status(201);
+                        expect(res.body).to.have.property("_id");
+                        expect(res.body).to.have.property("message");
+                        expect(res.body).to.have.property("url");
+                        encounterId = res.body._id;
+                        done();
+                    });
+
+            })
+        })
 
 
         /**
@@ -82,8 +121,8 @@ describe("User", () => {
             it('It should NOT GET all encounters.', (done) => {
                 agent
                     .get('/encounter')
-                    .end((err, response) => {
-                        response.should.have.status(404);
+                    .end((err, res) => {
+                        res.should.have.status(404);
                         done();
                     })
             })
@@ -94,15 +133,14 @@ describe("User", () => {
          */
         describe('GET /encounters/:id', () => {
             it('It should GET an encounter by ID.', (done) => {
-                const id = '62197b98a10a06efc7c8aa56'
                 agent
-                    .get(`/encounters/${id}`)
-                    .end((err, response) => {
-                        response.should.have.status(200);
-                        response.body.should.be.a('object');
-                        response.body.should.have.property('pokemon');
-                        response.body.should.have.property('_id');
-                        response.body.should.have.property('user');
+                    .get(`/encounters/${encounterId}`)
+                    .end((err, res) => {
+                        res.should.have.status(200);
+                        expect(res.body).to.be.a('object');
+                        expect(res.body).to.have.property('pokemon');
+                        expect(res.body).to.have.property('_id');
+                        expect(res.body).to.have.property('user');
                         done();
                     })
             })
@@ -132,44 +170,7 @@ describe("User", () => {
             })
         })
 
-        /**
-         * Test POST route.
-         */
-        describe('POST /encounters', () => {
-            it('It should CREATE a new encounter.', (done) => {
-                agent
-                    .post('/encounters')
-                    .send({token: token,
-                    pokemon: {
-                        pokemonId: 1,
-                        name: "bulbasaur",
-                        imageUrl: "https://www.serebii.net/pokemongo/pokemon/001.png",
-                        type: [
-                            "grass",
-                            "poison"
-                        ],
-                        weight: 80,
-                        height: 9,
-                        moves: [
-                            "fury-cutter",
-                            "tackle",
-                            "outrage",
-                            "facade"
-                        ]
-                    },
-                    caught: false})
-                    .end((err, res) => {
-                        expect(err).to.be.null;
-                        expect(res).to.have.status(201);
-                        expect(res).to.have.property("_id");
-                        expect(res).to.have.property("message");
-                        expect(res).to.have.property("url");
-                        encounterId = res.body._id;
-                        done();
-                    });
 
-            })
-        })
 
         /**
          * Test PATCH route.
@@ -182,11 +183,11 @@ describe("User", () => {
                     .end((err, res) => {
                         expect(err).to.be.null;
                         expect(res).to.have.status(201);
-                        expect(res).to.have.property("userId");
-                        expect(res).to.have.property("pokemonId");
-                        expect(res).to.have.property("message");
-                        expect(res).to.have.property("update");
-                        expect(res).to.have.property("pokeUrl");
+                        expect(res.body).to.have.property("userId");
+                        expect(res.body).to.have.property("pokemonId");
+                        expect(res.body).to.have.property("message");
+                        expect(res.body).to.have.property("update");
+                        expect(res.body).to.have.property("pokeUrl");
                         userId = res.body.userId;
                         done();
                     });
@@ -204,7 +205,7 @@ describe("User", () => {
                     .end((err, res) => {
                         expect(err).to.be.null;
                         expect(res).to.have.status(200);
-                        expect(res).to.have.property("message");
+                        expect(res.body).to.have.property("message");
                         done();
                     });
             })

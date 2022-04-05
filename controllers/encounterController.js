@@ -146,7 +146,7 @@ exports.update_encounter = async (req, res, next) => {
                                     //if pokemon is caught create a new Pokemon and udpate  
                                         //Get move info, create new move object, set new pokemon property moves to 
                                         const movesArray = [];
-                                        await userController.getPokeMoves(encounter.pokemon.moves, movesArray).then(result => {
+                                        await userController.getPokeMoves(encounter.pokemon.moves, movesArray, res).then(result => {
                                             // console.log(result + ' getpokemoves');
                                         }).catch(err => {
                                             console.log(err);

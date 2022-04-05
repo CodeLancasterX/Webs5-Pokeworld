@@ -20,13 +20,16 @@ exports.get_all_users = (req, res, next) => {
 
             if (obj.length >= 1) {
 
-                const response = obj.map(obj => {
-                    return {
-                        name: obj.name,
-                        _id: obj._id,
-                        url: req.protocol + '://' + req.get('host') + req.originalUrl + '/' + obj._id
-                    }
-                })
+                const response = {
+                    count: obj.length,
+                    users: obj.map(obj => {
+                        return {
+                            name: obj.name,
+                            _id: obj._id,
+                            url: req.protocol + '://' + req.get('host') + req.originalUrl + '/' + obj._id
+                        }
+                    })
+                }
 
                 res.status(200).json(response)
             } else {
@@ -385,8 +388,7 @@ exports.sign_up = (req, res, next) => {
                                         for (let i = 0; i < 4; i++) {
                                             pokeMoves.push(pokeData.moves[Math.floor(Math.random() * pokeData.moves.length)].move.name)
                                         }
-
-                                        await getPokeMoves(pokeMoves, movesArray).then(result => {
+                                        await this.getPokeMoves(pokeMoves, movesArray, res).then(result => {
                                             console.log(result + ' getpokemoves');
                                         }).catch(err => {
                                             console.log(err);
@@ -420,12 +422,11 @@ exports.sign_up = (req, res, next) => {
                                                 name: req.body.name,
                                                 email: req.body.email,
                                                 password: hash,
-                                                caughtPokemon: idArray
+                                                caughtPokemon: idArray,
+                                                isAdmin: req.body.isAdmin /*for testing purposes only*/
                                             });
                                             user.save()
                                                 .then(result => {
-                                                    console.log(result);
-                                                    // console.log(req)
                                                     const pokemon = Pokemon({
                                                         _id: pokemonId,
                                                         pokemonId: pokeData.id,
@@ -443,6 +444,7 @@ exports.sign_up = (req, res, next) => {
                                                             console.log(result);
 
                                                             res.status(201).json({
+                                                                _id: userId.toHexString(),
                                                                 message: "User: \`" + user.name + "\` has been created.",
                                                                 url: req.protocol + '://' + req.get('host') + req.baseUrl + '/' + user._id
                                                             });
@@ -609,7 +611,7 @@ exports.update_encounter = (req, res, next) => {
                                     //if pokemon is caught create a new Pokemon and udpate  
                                         //Get move info, create new move object, set new pokemon property moves to 
                                         const movesArray = [];
-                                        await getPokeMoves(encounter.pokemon.moves, movesArray).then(result => {
+                                        await getPokeMoves(encounter.pokemon.moves, movesArray, res).then(result => {
                                             // console.log(result + ' getpokemoves');
                                         }).catch(err => {
                                             console.log(err);
@@ -752,6 +754,7 @@ exports.login = (req, res, next) => {
                         })
 
                     res.status(200).json({
+                        _id: user[0]._id,
                         message: 'Auth succesful.',
                         token: token
                     })
@@ -916,7 +919,7 @@ exports.update_pokemonMoves_by_userId = (req, res, next) => {
                             }
                         }
         
-                        await getPokeMoves(pokeMoves, movesArray).then( async result => {
+                        await getPokeMoves(pokeMoves, movesArray, res).then( async result => {
                             // console.log(result + ' getpokemoves');
                             console.log(movesArray)
                             Pokemon.findOneAndUpdate({$and: [{owner: {$eq: user._id}}, {_id: {$eq: req.params.pokemonId}} ]}, {$set: {moves: movesArray}}, {new: true})
@@ -928,7 +931,9 @@ exports.update_pokemonMoves_by_userId = (req, res, next) => {
                             })
                             .catch()
                         }).catch( err =>{
-                            console.log(err)
+                            res.status(500).json({
+                                error: err
+                            })
                         })
         
                      });
@@ -1010,7 +1015,7 @@ exports.delete_user_by_userId = (req, res, next) => {
     .exec()
     .then( user => {
         if ( user ) {
-            User.remove({
+            User.deleteOne({
                 _id: user._id
             })
             .exec()
@@ -1018,10 +1023,11 @@ exports.delete_user_by_userId = (req, res, next) => {
                 console.log(result);
     
                 res.status(200).json({
-                    message: "User with ID: " + Id + " has succesfully been deleted."
+                    message: "User with ID/name: " + $or + " has succesfully been deleted."
                 });
             })
             .catch(err => {
+                console.log(err)
                 res.status(500).json({
                     error: err
                 });
@@ -1068,7 +1074,7 @@ exports.delete_pokemon_by_userId = async (req, res, next) => {
 }
 
 
-exports.getPokeMoves = async function getPokeMoves(pokeMoves, movesArray) {
+exports.getPokeMoves = async function getPokeMoves(pokeMoves, movesArray, res) {
     
     for (const pokeMove of pokeMoves) {
         console.log(pokeMove + ' the move.');
