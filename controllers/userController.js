@@ -733,8 +733,9 @@ exports.login = (req, res, next) => {
         .select('email password _id')
         .exec()
         .then(user => {
+            console.log(user.length)
             if (user.length < 1) {
-                res.status(401).json({
+                return res.status(401).json({
                     message: 'Auth failed.' /*chose not to return mail unknown message to prevent bruteforce.*/
                 })
             }
@@ -1003,41 +1004,54 @@ exports.update_pokemon_by_userId = (req, res, next) => {
     
 }
 
-exports.delete_user_by_userId = (req, res, next) => {
+exports.delete_user_by_userId = async (req, res, next) => {
     const id = req.params.userId;
     const $or = [ { name : id } ];
-  
+
     if (ObjectId.isValid(id)) {
       $or.push({ _id : ObjectId(id) });
     }
 
-    User.findOne({$or: $or})
-    .exec()
-    .then( user => {
-        if ( user ) {
-            User.deleteOne({
-                _id: user._id
-            })
-            .exec()
-            .then(result => {
-                console.log(result);
+    const user = await User.findOne({$or: $or})
+    if (user) {
+        user.deleteOne({
+            _id: user._id
+        })
+        res.status(200).json({
+            message: "User with ID/name: " + $or + " has succesfully been deleted."
+        });
+    } else {
+        res.status(404).json({
+            message: 'No user found.'
+        })
+    }
+
+
+
+    // .exec()
+    // .then( user => {
+    //     if ( user ) {
+    //         User.deleteOne({
+    //             _id: user._id
+    //         })
+    //         .exec()
+    //         .then(result => {
+    //             console.log(result);
     
-                res.status(200).json({
-                    message: "User with ID/name: " + $or + " has succesfully been deleted."
-                });
-            })
-            .catch(err => {
-                console.log(err)
-                res.status(500).json({
-                    error: err
-                });
-            });
-        } else {
-            res.status(500).json({
-                message: 'No user found.'
-            })
-        }
-    })
+
+    //         })
+    //         .catch(err => {
+    //             console.log(err)
+    //             res.status(500).json({
+    //                 error: err
+    //             });
+    //         });
+    //     } else {
+    //         res.status(404).json({
+    //             message: 'No user found.'
+    //         })
+    //     }
+    // })
 
    
 }

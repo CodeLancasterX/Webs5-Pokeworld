@@ -12,19 +12,13 @@ userSchema = mongoose.Schema({
     isAdmin: {type: Boolean, required: false, default: false}
 });
 
-//TODO: test.
-// userSchema.pre('deleteOne', {document:true}, function(next) {
-//     const userOwnedPokemon = await Pokemon.find({ _owner: this.owner});
-//     for (let pokeIndex = 0; pokeIndex < userOwnedPokemon.length; pokeIndex++) {
-//         await userOwnedPokemon[pokeIndex].deleteOne();
-//     }
+userSchema.pre('deleteOne', {document:true}, async function(next) {
+    const userOwnedPokemon = await Pokemon.find({owner: this._id});
+    await Pokemon.deleteMany({_id: {$in: userOwnedPokemon}})
 
-//     const userEncounters = await Encounter.find({user: this._id});
-//     for (let pokeIndex = 0; pokeIndex < userEncounters.length; pokeIndex++) {
-//         await userEncounters[pokeIndex].deleteOne();
-//     }
-
-//     next();
-// })
+    const userEncounters = await Encounter.find({user: this._id});
+    await Encounter.deleteMany({_id: {$in: userEncounters}})
+    next();
+})
 
 module.exports = mongoose.model('User', userSchema);

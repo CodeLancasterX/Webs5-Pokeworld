@@ -5,21 +5,15 @@ const expect = chai.expect;
 
 chai.use(chaiHttp);
 
-//create jwt token authentication.
-// const defaultUser = {
-//     _id: '62435de9e3fc1bcdedd774f5',
-//     email: 'CJTheNewTest@NewLancaster.com',
-//     password: 'password'
-// }
-const adminUser = {
-    name: 'CJTheNewTest',
-    email: 'CJTheNewTest@NewLancaster.com',
-    password: 'password',
-    pokemon: 'squirtle',
+let adminUser = {
+    name: "CJTheNewTest",
+    email: "CJTheNewTest@NewLancaster.com",
+    password: "password",
+    pokemon: "squirtle",
     isAdmin: true
 }
 
-const defaultUser = {
+let defaultUser = {
     name: 'CJToBeDeletedTest',
     email: 'CJToBeDeleted@NewLancaster.com',
     password: 'password',
@@ -68,7 +62,7 @@ describe("User", () => {
                 .end((err, res) => {
                     expect(err).to.be.null;
                     expect(res).to.have.status(201);
-                    // console.log(res)
+                    console.log(res.body)
                     defaultUser._id = res.body._id;
                     done();
                 });
@@ -113,8 +107,8 @@ describe("User", () => {
         /**
          * Test DELETE route.
          */
-         describe('DELETE /users/:id', () => {
-            it('It should DELETE a user.', (done) => {
+        describe('DELETE /users/:id', () => {
+            it('It should DELETE a default user.', (done) => {
                 agent
                     .delete(`/users/${defaultUser._id}`)
                     .send({token: token})
@@ -125,9 +119,23 @@ describe("User", () => {
                     })
             })
         })
-        
 
-        
+
+        /**
+         * Test DELETE route.
+         */
+         describe('DELETE /users/:id', () => {
+            it('It should DELETE an admin user.', (done) => {
+                agent
+                    .delete(`/users/${adminUser._id}`)
+                    .send({token: token})
+                    .end((err, res) => {
+                        expect(err).to.be.null;
+                        expect(res).to.have.status(200);
+                        done();
+                    })
+            })
+        })        
 
         // describe('GET /users', () => {
         //     it('It should NOT GET all users.', (done) => {
