@@ -12,7 +12,6 @@ const Move = require('../models/move');
 const user = require('../models/user');
 const ObjectId = require('mongoose').Types.ObjectId;
 
-//get users
 exports.get_all_users = (req, res, next) => {
     User.find()
         .select('name')
@@ -47,7 +46,6 @@ exports.get_all_users = (req, res, next) => {
         });
 }
 
-//get specific user
 exports.get_user_by_id = (req, res, next) => {
     const id = req.params.userId;
     const $or = [ { name : id } ];
@@ -132,7 +130,6 @@ exports.get_encounter_by_userId = (req, res, next) => {
     
 }
 
-//get user owned pokemon
 exports.get_all_pokemon_by_userId = (req, res, next) => {
 	
     const id = req.params.userId;
@@ -175,7 +172,6 @@ exports.get_all_pokemon_by_userId = (req, res, next) => {
 
 }
 
-//get specific user owned pokemon
 exports.get_pokemon_by_userId = (req, res, next) => {
     // console.log(req.userData)
     const id = req.params.userId;
