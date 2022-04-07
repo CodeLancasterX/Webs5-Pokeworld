@@ -18,26 +18,6 @@ let encounterId;
 let userId;
 
 describe("User", () => {
-    // await beforeEach(async done => {
-    //     const response = await chai.request(server)
-    //         .post("/users/signup")
-    //         .send(defaultUser)
-    //     done();
-    //     response.should.have.status(201);
-    // }, 10000)
-    
-
-
-
-    // await afterEach(async (done) => {
-    //     // After each test we truncate the database
-    //     User.deleteOne({
-    //         email: defaultUser.email
-    //     }, err => {
-    //         console.log('check.')
-    //     });
-    //     done();
-    // }, 10000);
     
     let agent = chai.request.agent(server);
 
@@ -108,10 +88,10 @@ describe("User", () => {
             it('It should GET all encounters.', (done) => {
                 agent
                     .get('/encounters')
-                    .end((err, response) => {
-                        response.should.have.status(200);
-                        response.body.encounters.should.be.a('array');
-                        response.body.encounters.length.should.be.eq(response.body.count);
+                    .end((err, res) => {
+                        res.should.have.status(200);
+                        res.body.encounters.should.be.a('array');
+                        res.body.encounters.length.should.be.eq(res.body.count);
                         done();
                     })
             })

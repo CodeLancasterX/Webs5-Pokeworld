@@ -22,26 +22,7 @@ let token;
 let battleId;
 
 describe("User", () => {
-    // await beforeEach(async done => {
-    //     const response = await chai.request(server)
-    //         .post("/users/signup")
-    //         .send(defaultUser)
-    //     done();
-    //     response.should.have.status(201);
-    // }, 10000)
-    
 
-
-
-    // await afterEach(async (done) => {
-    //     // After each test we truncate the database
-    //     User.deleteOne({
-    //         email: defaultUser.email
-    //     }, err => {
-    //         console.log('check.')
-    //     });
-    //     done();
-    // }, 10000);
     let agent = chai.request.agent(server);
 
     beforeEach( function(done){
@@ -72,10 +53,10 @@ describe("User", () => {
             it('It should GET all battles.', (done) => {
                 agent
                     .get('/battles')
-                    .end((err, response) => {
-                        response.should.have.status(200);
-                        response.body.battles.should.be.a('array');
-                        response.body.battles.length.should.be.eq(response.body.count);
+                    .end((err, res) => {
+                        res.should.have.status(200);
+                        res.body.battles.should.be.a('array');
+                        res.body.battles.length.should.be.eq(res.body.count);
                         done();
                     })
             })
@@ -85,8 +66,8 @@ describe("User", () => {
             it('It should NOT GET all battles.', (done) => {
                 agent
                     .get('/battle')
-                    .end((err, response) => {
-                        response.should.have.status(404);
+                    .end((err, res) => {
+                        res.should.have.status(404);
                         done();
                     })
             })
@@ -100,12 +81,12 @@ describe("User", () => {
                 const id = '6231af3fad6e38e97fa54f88'
                 agent
                     .get('/battles/' + id)
-                    .end((err, response) => {
-                        response.should.have.status(200);
-                        response.body.should.be.a('object');
-                        response.body.should.have.property('challenger');
-                        response.body.should.have.property('defender');
-                        response.body.should.have.property('winner');
+                    .end((err, res) => {
+                        res.should.have.status(200);
+                        res.body.should.be.a('object');
+                        res.body.should.have.property('challenger');
+                        res.body.should.have.property('defender');
+                        res.body.should.have.property('winner');
                         done();
                     })
             })
@@ -128,8 +109,8 @@ describe("User", () => {
                 const id = '6231af3fad6e38e97fa54f87'
                 agent
                     .get('/battles/' + id)
-                    .end((err, response) => {
-                        response.should.have.status(404);
+                    .end((err, res) => {
+                        res.should.have.status(404);
                         done();
                     })
             })

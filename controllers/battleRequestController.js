@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const Battle = require('../models/battle');
 const User = require('../models/user');
 
-exports.get_all_battleRequests = async (req, res, next) => {
+exports.get_all_battleRequests = (req, res, next) => {
     BattleRequest.find()
     .select('_id challenger defender status')
     .populate('challenger defender', 'name')
@@ -11,8 +11,8 @@ exports.get_all_battleRequests = async (req, res, next) => {
     .then( obj => {
         if ( obj.length >= 1 ){
             const battleRequest = {
-                count: obj.count,
-                battleRequest: obj.map( obj => {
+                count: obj.length,
+                battleRequests: obj.map( obj => {
                     return {
                         id: obj.id,
                         challenger: obj.challenger,
@@ -34,7 +34,7 @@ exports.get_all_battleRequests = async (req, res, next) => {
     })
 }
 
-exports.get_battleRequest_by_id = async (req, res, next) => {
+exports.get_battleRequest_by_id = (req, res, next) => {
     const id = req.params.id;
     BattleRequest.findById(id)
     .select('_id challenger defender status')
@@ -55,7 +55,7 @@ exports.get_battleRequest_by_id = async (req, res, next) => {
     })
 }
 
-exports.create_battleRequest = async (req, res, next) => {
+exports.create_battleRequest = (req, res, next) => {
     User.findById(req.body.defender)
     .exec()
     .then( defenderData => {
@@ -64,7 +64,7 @@ exports.create_battleRequest = async (req, res, next) => {
             BattleRequest.find({$and: [{challenger: {$eq: req.body.challenger}} , {defender: {$eq: req.body.defender}} , {status: {$eq: 'Pending'}}]})
             .exec()
             .then( brCheck => {
-                console.log(brCheck);
+                // console.log(brCheck);
                 if (brCheck.length < 1){
                     const battleRequest = new BattleRequest({
                         _id: new mongoose.Types.ObjectId,
@@ -75,8 +75,9 @@ exports.create_battleRequest = async (req, res, next) => {
                 
                     battleRequest.save()
                     .then( result => {
-                        console.log(result);
+                        // console.log(result);
                         res.status(201).json({
+                            _id: battleRequest._id,
                             message: "Battle Request was sent, only status can be edited.",
                             url: req.protocol + '://' + req.get('host') + req.originalUrl + '/' + battleRequest._id
                         })
@@ -113,7 +114,7 @@ exports.create_battleRequest = async (req, res, next) => {
 }
 
 //if accepted create new battle.
-exports.update_battleRequest_by_id = async (req, res, next) => {
+exports.update_battleRequest_by_id = (req, res, next) => {
     //no new request may be made if one is still pending.
     const id = req.params.id;
     const status = req.body.status;
@@ -121,10 +122,11 @@ exports.update_battleRequest_by_id = async (req, res, next) => {
     BattleRequest.findById(id)
     .exec()
     .then( battleCheck => {
+        console.log(battleCheck)
         //checking status before update.
         if (battleCheck.status == 'Accepted') {
-            return res.status(500).json({
-                message: 'Cannot modify an accepted battle.'
+            return res.status(400).json({
+                message: `Cannot modify a battle with \'${battleCheck.status}\' status.`
             })
         } else {
             BattleRequest.updateOne({_id: id}, {$set: {
@@ -181,7 +183,7 @@ exports.update_battleRequest_by_id = async (req, res, next) => {
                         }
                         
                     } else {
-                        res.status(200).json({message: 'Use \'status\' in the body of the request.'})
+                        res.status(400).json({message: 'Use \'status\' in the body of the request.'})
                     }
                 } else {
                     res.status(404).json({
@@ -202,7 +204,7 @@ exports.update_battleRequest_by_id = async (req, res, next) => {
     .catch( err => res.status(500).json({error: err}));   
 }
 
-exports.delete_battleRequest_by_id = async (req, res, next) => {
+exports.delete_battleRequest_by_id =  (req, res, next) => {
     const id = req.params.id;
     BattleRequest.deleteOne({ _id: id })
     .exec()
