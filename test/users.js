@@ -5,14 +5,7 @@ const expect = chai.expect;
 
 chai.use(chaiHttp);
 
-
-
-
-
 let token;
-// let userId;
-
-
 
 let agent = chai.request.agent(server);
 
