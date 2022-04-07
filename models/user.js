@@ -36,8 +36,6 @@ userSchema.post('deleteOne', {document:true}, async function(next) {
         let defender = await this.constructor.findOne({_id: battleRequest.defender});
 
         if (challenger == null && defender == null) {
-
-            console.log(battleRequest._id)
             await BattleRequest.deleteOne({_id: battleRequest._id});
         }
     });
@@ -52,8 +50,6 @@ userSchema.post('deleteOne', {document:true}, async function(next) {
         let defender = await this.constructor.findOne({_id: battle.defender});
 
         if (challenger == null && defender == null) {
-
-            console.log(battle._id)
             await Battle.deleteOne({_id: battle._id});
         }
     });

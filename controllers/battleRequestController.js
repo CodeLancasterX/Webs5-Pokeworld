@@ -41,12 +41,12 @@ exports.get_battleRequest_by_id = (req, res, next) => {
     .populate('challenger defender', 'name')
     .exec()
     .then( result => {
-        console.log(result);
+        // console.log(result);
 
         if (result) {
             res.status(200).json(result)
         } else {
-            res.status(200).json({ message: 'No battle request found for ID: ' + id })
+            res.status(404).json({ message: 'No battle request found for ID: ' + id })
         }
     })
     .catch( err => {
@@ -122,8 +122,13 @@ exports.update_battleRequest_by_id = (req, res, next) => {
     BattleRequest.findById(id)
     .exec()
     .then( battleCheck => {
-        console.log(battleCheck)
+        // if(battle)
         //checking status before update.
+        if (!battleCheck) {
+            return res.status(404).json({
+                message: `No battle could be found for ID: ${id}.`
+            })
+        }
         if (battleCheck.status == 'Accepted') {
             return res.status(400).json({
                 message: `Cannot modify a battle with \'${battleCheck.status}\' status.`
@@ -145,6 +150,7 @@ exports.update_battleRequest_by_id = (req, res, next) => {
                         const battleRequest = {
                             message: 'Battle request with ID: '+ id + ' has been updated.',
                             _id: id,
+                            status: status,
                             battleRequestUrl: req.protocol + '://' + req.get('host') + req.originalUrl
                         }
             
@@ -162,6 +168,7 @@ exports.update_battleRequest_by_id = (req, res, next) => {
                                 battle.save()
                                 .then( battleResult => {
                                     console.log(battleResult);
+                                    battleRequest.battleId = battle._id;
                                     battleRequest.message = 'Battle request with ID: '+ id + ' has been updated.';
                                     battleRequest.battleUrl = req.protocol + '://' + req.get('host') + '/' + 'battles/'+ battle._id
                                     return res.status(201).json(battleRequest);

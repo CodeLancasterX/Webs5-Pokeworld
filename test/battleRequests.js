@@ -7,7 +7,7 @@ chai.use(chaiHttp);
 
 let token;
 
-describe('Two users and a battlerequest should be created', () => {
+describe('Battle request should be created, read, edited and deleted.', () => {
 
     let agent = chai.request.agent(server);
     
@@ -26,19 +26,9 @@ describe('Two users and a battlerequest should be created', () => {
         pokemon: 'bulbasaur',
         isAdmin: false
     }
-    
-    describe('GET /battlerequests', () => {
-        it('It GET all battle requests.', (done) => {
-            agent
-                .get("/battlerequests")
-                .end((err, res) => {
-                    expect(err).to.be.null;
-                    expect(res).to.have.status(200);
-                    expect(res.body.battleRequests.length).to.be.eq(res.body.count);
-                    done();
-                });
-        })
-    })
+
+    let battleRequestId;
+    let battleId;
 
     describe('POST /users/signup admin', () => {
         it('It should sign up an admin.', (done) => {
@@ -96,11 +86,57 @@ describe('Two users and a battlerequest should be created', () => {
                 .end((err, res) => {
                     expect(err).to.be.null;
                     expect(res).to.have.status(201);
+                    battleRequestId = res.body._id
                     done();
                 });
         })
     })
     
+    describe('GET /battlerequests', () => {
+        it('It GET all battle requests.', (done) => {
+            agent
+                .get("/battlerequests")
+                .end((err, res) => {
+                    expect(err).to.be.null;
+                    expect(res).to.have.status(200);
+                    expect(res.body.battleRequests.length).to.be.eq(res.body.count);
+                    done();
+                });
+        })
+    })
+
+    describe('PATCH /battlerequests/:id', () => {
+        it('It should edit a specific battle request.', (done) => {
+
+                agent
+                .patch(`/battlerequests/${battleRequestId}`)
+                .send({token: token, status: "Accepted"})
+                .end((err, res) => {
+                    console.log(res.body)
+                    battleId = res.body.battleId;
+                    expect(err).to.be.null;
+                    expect(res).to.have.status(201);
+
+                    done();
+                });
+
+        })
+    })
+
+    describe('GET /battles/:id', () => {
+        it('Battle should be created after accept status.', (done) => {
+
+                agent
+                .get(`/battles/${battleId}`)
+                .end((err, res) => {
+                    expect(err).to.be.null;
+                    expect(res).to.have.status(200);
+                    console.log(res.body)
+                    done();
+                });
+
+        })
+    })
 
     //delete test.
     describe('DELETE /users/:id', () => {
@@ -133,4 +169,21 @@ describe('Two users and a battlerequest should be created', () => {
         })
     })
 
+    describe('GET /battlerequests/:id', () => {
+        it('It should NOT GET a specific battle request.', (done) => {
+            setTimeout(() => {
+                agent
+                .get(`/battlerequests/${battleRequestId}`)
+                .end((err, res) => {
+                    expect(err).to.be.null;
+                    expect(res).to.have.status(404);
+                    done();
+                });
+            }, 5000);
+
+        })
+    })
+
+
 })
+
