@@ -13,7 +13,7 @@ router.get('/:userId/encounters', checkAuth, UserController.get_encounter_by_use
 
 router.get('/:userId/pokemon', UserController.get_all_pokemon_by_userId)
 
-router.get('/:userId/pokemon/:pokemonId', checkAuth, UserController.get_pokemon_by_userId)
+router.get('/:userId/pokemon/:pokemonId', UserController.get_pokemon_by_userId)
 
 //get specific move for user owned pokemon
 router.get('/:userId/pokemon/:pokemonId/moves/:moveId', checkAuth, UserController.get_pokemonMove_by_pokemon_with_userId)
@@ -28,7 +28,7 @@ router.post('/signup', UserController.sign_up)
 router.post('/login', UserController.login)
 
 //create encounter 
-router.post('/:userId/encounters/new', checkAuth, UserController.create_encounter)
+router.post('/:userId/encounters', checkAuth, UserController.create_encounter)
 
 //update encounter
 router.patch('/:userId/encounters/:encounterId', checkAuth, UserController.update_encounter)
@@ -37,14 +37,13 @@ router.patch('/:userId/encounters/:encounterId', checkAuth, UserController.updat
 router.patch('/:userId', checkAuth, UserController.update_user_by_id)
 
 //update user owned pokemon. solve null userId with checkAuth
-router.patch('/:userId/pokemon/:pokemonId/moves', UserController.update_pokemonMoves_by_userId)
+router.patch('/:userId/pokemon/:pokemonId/moves', checkAuth, UserController.update_pokemonMoves_by_userId)
 
-router.patch('/:userId/pokemon/:pokemonId', UserController.update_pokemon_by_userId)
+router.patch('/:userId/pokemon/:pokemonId', checkAuth, UserController.update_pokemon_by_userId)
 
-//TODO: cascade delete pokemon and encounters. delete user
 router.delete('/:userId', checkAuth, checkAdmin, UserController.delete_user_by_userId)
 
-router.delete('/:userId/pokemon/:pokemonId', UserController.delete_pokemon_by_userId)
+router.delete('/:userId/pokemon/:pokemonId', checkAuth, UserController.delete_pokemon_by_userId)
 
 
 module.exports = router;

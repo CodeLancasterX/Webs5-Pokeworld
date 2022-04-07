@@ -9,6 +9,7 @@ const Pokemon = require('../models/pokemon');
 const Battle = require('../models/battle');
 const Encounter = require('../models/encounter');
 const Move = require('../models/move');
+const user = require('../models/user');
 const ObjectId = require('mongoose').Types.ObjectId;
 
 //get users
@@ -109,7 +110,7 @@ exports.get_encounter_by_userId = (req, res, next) => {
                         response
                     })
                 } else {
-                    res.status(500).json({message: 'No encounters found for this user.'})
+                    res.status(404).json({message: 'No encounters found for this user.'})
                 }
             })
             .catch( err => {
@@ -118,7 +119,7 @@ exports.get_encounter_by_userId = (req, res, next) => {
                 })
             })
         } else {
-            res.status(500).json({
+            res.status(404).json({
                 message: 'No user found.'
             })
         }
@@ -140,7 +141,6 @@ exports.get_all_pokemon_by_userId = (req, res, next) => {
     if (ObjectId.isValid(id)) {
       $or.push({ _id : ObjectId(id) });
     }
-
     User.findOne({$or: $or})
     .exec()
     .then( user => {
@@ -155,7 +155,8 @@ exports.get_all_pokemon_by_userId = (req, res, next) => {
                     })
                 } else {
                     res.status(200).json({
-                        result: result
+                        count: result.length,
+                        pokemon: result
                     })
                 }
         
@@ -367,7 +368,7 @@ exports.sign_up = (req, res, next) => {
                             .then(starterCheck => {
                                 if (starterCheck != null) {
                                 if (starterCheck.starter) {
-                                    console.log(starterCheck)
+                                    // console.log(starterCheck)
                                     const caughtArray = [];
                                     const movesArray = [];
                                     caughtArray.push(starterCheck)
@@ -389,7 +390,7 @@ exports.sign_up = (req, res, next) => {
                                             pokeMoves.push(pokeData.moves[Math.floor(Math.random() * pokeData.moves.length)].move.name)
                                         }
                                         await this.getPokeMoves(pokeMoves, movesArray, res).then(result => {
-                                            console.log(result + ' getpokemoves');
+                                            // console.log(result + ' getpokemoves');
                                         }).catch(err => {
                                             console.log(err);
                                         });
@@ -410,7 +411,7 @@ exports.sign_up = (req, res, next) => {
                                             }
                                             const imageUrl = 'https://www.serebii.net/pokemongo/pokemon/' + pokemonImageId + '.png';
 
-                                            console.log(movesArray)
+                                            // console.log(movesArray)
                                             const userId = new mongoose.Types.ObjectId;
                                             const pokemonId = new mongoose.Types.ObjectId;
 
@@ -441,7 +442,7 @@ exports.sign_up = (req, res, next) => {
                                                     })
                                                     pokemon.save()
                                                         .then(result => {
-                                                            console.log(result);
+                                                            // console.log(result);
 
                                                             res.status(201).json({
                                                                 _id: userId.toHexString(),
@@ -544,6 +545,7 @@ exports.create_encounter = (req, res, next) => {
                     .then(result => {
                         console.log(result);
                         res.status(201).json({
+                            _id: encounter._id,
                             message: "Encounter has been created.",
                             url: req.protocol + '://' + req.get('host') + '/encounters/' + encounter._id
                         });
@@ -733,7 +735,6 @@ exports.login = (req, res, next) => {
         .select('email password _id')
         .exec()
         .then(user => {
-            console.log(user.length)
             if (user.length < 1) {
                 return res.status(401).json({
                     message: 'Auth failed.' /*chose not to return mail unknown message to prevent bruteforce.*/
@@ -777,45 +778,39 @@ exports.login = (req, res, next) => {
         });
 }
 
-exports.update_user_by_id = (req, res, next) => {
-    const id = req.params.userId; /*can also get this info from checkauth so api is more secure*/
+exports.update_user_by_id = async (req, res, next) => {
+    // allow new email
+    // allow new password 
+    const id = req.params.userId;
     const email = req.body.email;
-    const name = req.body.name;
+    const newEmail = req.body.newEmail;
 
-    // User.find({ }) see if email already exists before updating.
-    // see if email and/or name is null after using find method.
-    //doesnt seem wise to use username in the link for this route.
-    User.find({
-            email: email
-        } || {
-            name: name
-        })
+    User.findOne({email: newEmail})
         .exec()
-        .then(uniqueResult => {
-            console.log(uniqueResult + " some text")
-            if (uniqueResult[0] != null) {
-                console.log(uniqueResult[0].email + " some text")
-                if (uniqueResult[0].email == email || uniqueResult[0].name == name) {
-                    if (uniqueResult[0].email == email) {
+        .then(async uniqueResult => {
+            // console.log(uniqueResult + " some text")
+            if (uniqueResult != null) {
+                // console.log(uniqueResult.email + " some text")
+                if (uniqueResult.email == newEmail) {
+                    if (uniqueResult.email == newEmail) {
                         return res.status(409).json({
                             message: 'Email already exists.'
                         })
                     }
-
-                    if (uniqueResult[0].name == name) {
-                        return res.status(409).json({
-                            message: 'Username already exists.'
-                        })
-                    }
                 }
             } else {
-                bcrypt.hash(req.body.password, 10, (err, hash) => {
+                bcrypt.hash(req.body.password, 10, async (err, hash) => {
                     if (err) {
                         return res.status(500).json({
                             error: err
                         })
                     } else {
-                        req.body.password = hash
+                        const userInfo = await User.find({email: email})
+                        req.body.name = userInfo.name;
+                        req.body.password = hash;
+                        req.body.email = req.body.newEmail;
+
+                        //Didnt user findOneAndUpdate because updateOne shows if anything was modified.
                         User.updateOne({
                                 _id: id
                             }, {
@@ -828,8 +823,8 @@ exports.update_user_by_id = (req, res, next) => {
                                 const user = {
                                     message: 'User has been updated.',
                                     _id: id,
-                                    name: name,
-                                    email: email,
+                                    name: userInfo.name,
+                                    email: newEmail,
                                     password: hash
                                 }
                                 if (result.modifiedCount >= 1) {
@@ -883,7 +878,7 @@ exports.update_pokemonMoves_by_userId = (req, res, next) => {
             Pokemon.findOne({$and: [{owner: {$eq: user._id}}, {_id: {$eq: req.params.pokemonId}} ]})
             .exec()
             .then( async pokemon => {
-                // console.log(pokemon);
+                
                 if (pokemon) {
                     const requestedMoves = req.body.moves
                     const movesArray = [];
@@ -897,32 +892,26 @@ exports.update_pokemonMoves_by_userId = (req, res, next) => {
                         //see if requested moves are learnable by pokemon. 
                         let notFound = false;
                         for (let x = 0; x < requestedMoves.length; x++) {
-                            if (!notFound) {
-                                for (let y = 0; y < pokeData.moves.length; y++) {
-                                    // console.log(pokeData.moves[y].move.name)
-                                    if (pokeData.moves[y].move.name == requestedMoves[x]){
-                                        pokeMoves.push(requestedMoves[x])
-                                        break;
-                                    } else if (y == pokeData.moves.length - 1) {
-                                        if (requestedMoves[x] == null) {
-                                            console.log(pokeData.moves[x] + " and " + pokemon.moves[x])
-                                            requestedMoves[x] = pokemon.moves[x];
-                                        }
-                                        res.status(404).json({
-                                            message: 'Pokemon cannot learn ' + requestedMoves[x]
-                                        })
-                                        notFound = true;
-                                        break;
+                            for (let y = 0; y < pokeData.moves.length; y++) {
+                                // console.log(pokeData.moves[y].move.name)
+                                if (pokeData.moves[y].move.name == requestedMoves[x]){
+                                    pokeMoves.push(requestedMoves[x])
+                                    break;
+                                } else if (y == pokeData.moves.length - 1) {
+                                    if (requestedMoves[x] == null) {
+                                        console.log(pokeData.moves[x] + " and " + pokemon.moves[x])
+                                        requestedMoves[x] = pokemon.moves[x];
                                     }
+                                    return res.status(404).json({
+                                        message: 'Pokemon cannot learn ' + requestedMoves[x]
+                                    })
                                 }
-                            } else {
-                                break;
                             }
                         }
         
-                        await getPokeMoves(pokeMoves, movesArray, res).then( async result => {
+                        await this.getPokeMoves(pokeMoves, movesArray, res).then( async result => {
                             // console.log(result + ' getpokemoves');
-                            console.log(movesArray)
+                            // console.log(movesArray)
                             Pokemon.findOneAndUpdate({$and: [{owner: {$eq: user._id}}, {_id: {$eq: req.params.pokemonId}} ]}, {$set: {moves: movesArray}}, {new: true})
                             .exec()
                             .then(pokemon => {
@@ -953,7 +942,7 @@ exports.update_pokemonMoves_by_userId = (req, res, next) => {
         
         })
         } else {
-            res.status(500).json({
+            res.status(404).json({
                 message: 'No user found.'
             })
         }
@@ -1087,11 +1076,10 @@ exports.delete_pokemon_by_userId = async (req, res, next) => {
     
 }
 
-
 exports.getPokeMoves = async function getPokeMoves(pokeMoves, movesArray, res) {
     
     for (const pokeMove of pokeMoves) {
-        console.log(pokeMove + ' the move.');
+        // console.log(pokeMove + ' the move.');
         let body = await rp('https://pokeapi.co/api/v2/move/' + pokeMove);
         const moveData = await JSON.parse(body);
 
@@ -1101,7 +1089,7 @@ exports.getPokeMoves = async function getPokeMoves(pokeMoves, movesArray, res) {
         .exec()
         .then( async queriedMove => {
             if (queriedMove != null){
-                console.log(queriedMove.name + ' is already in the database! :), its ID: ' + queriedMove._id)
+                // console.log(queriedMove.name + ' is already in the database! :), its ID: ' + queriedMove._id) //Uncomment to see which moves are already in the database.
                 await movesArray.push(queriedMove._id);
             } else {
                 const move = await Move({
