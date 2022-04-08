@@ -2,7 +2,8 @@ const Pokemon = require('../models/pokemon');
 const mongoose = require('mongoose');
 
 exports.get_all_pokemon = (req, res, next) => {
-    let query = {};
+    console.log(req.query)
+    let query = req.query;
     if (req.query.limit == null){
         req.query.limit = 10
     }

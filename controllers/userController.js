@@ -13,7 +13,7 @@ const user = require('../models/user');
 const ObjectId = require('mongoose').Types.ObjectId;
 
 exports.get_all_users = (req, res, next) => {
-    let query = {};
+    let query = req.query;
     if (req.query.limit == null){
         req.query.limit = 10
     }

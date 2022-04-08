@@ -4,7 +4,7 @@ const Battle = require('../models/battle');
 const User = require('../models/user');
 
 exports.get_all_battleRequests = (req, res, next) => {
-    let query = {};
+    let query = req.query;
     if (req.query.limit == null){
         req.query.limit = 10
     }

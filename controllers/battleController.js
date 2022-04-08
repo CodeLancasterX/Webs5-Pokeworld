@@ -3,7 +3,7 @@ const User = require('../models/user');
 const mongoose = require('mongoose');
 
 exports.get_all_battles = (req, res, next) => {
-    let query = {};
+    let query = req.query;
     if (req.query.limit == null){
         req.query.limit = 10
     }

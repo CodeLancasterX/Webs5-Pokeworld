@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 
 //get all moves
 exports.get_all_moves = (req, res, next) => {
-    let query = {};
+    let query = req.query;
     if (req.query.limit == null){
         req.query.limit = 10
     }
