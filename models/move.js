@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Pokemon = require('./pokemon');
+const mongoosePaginate = require('mongoose-paginate-v2');
 
 moveSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
@@ -9,6 +10,8 @@ moveSchema = mongoose.Schema({
     accuracy: {type: Number, required: false, min: 0, max: 100, default: null},
     power: {type: Number, required: false, default: null}
 });
+
+moveSchema.plugin(mongoosePaginate);
 
 moveSchema.pre('findOneAndUpdate', function(next) {
     console.log('pre udpate hook triggered @moveModel.')

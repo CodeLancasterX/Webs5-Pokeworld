@@ -2,17 +2,25 @@ const Pokemon = require('../models/pokemon');
 const mongoose = require('mongoose');
 
 exports.get_all_pokemon = (req, res, next) => {
-    Pokemon.find()
-    .populate('owner', 'name ')
-    .select('name nickName')
-    .exec()
-    .then(obj => {
+    let query = {};
+    if (req.query.limit == null){
+        req.query.limit = 10
+    }
 
-        if (obj.length >= 1){
+    if (req.query.page == null) {
+        req.query.page = 1
+    }
 
+    Pokemon.paginate(query, {page: req.query.page, limit: req.query.limit, populate: ({ path: 'owner', select: "name" }) /*select: ["name", "starter"]*/})
+    .then(result => {
+
+        if (result.docs.length >= 1){
             const response = {
-                count: obj.length,
-                pokemon: obj.map( obj => {
+                total: result.totalDocs,
+                count: result.docs.length,
+                currentPage: result.page,
+                totalPages: result.totalPages,
+                pokemon: result.docs.map( obj => {
                     return {
                         _id: obj._id,
                         name: obj.name,

@@ -4,20 +4,30 @@ const Battle = require('../models/battle');
 const User = require('../models/user');
 
 exports.get_all_battleRequests = (req, res, next) => {
-    BattleRequest.find()
-    .select('_id challenger defender status')
-    .populate('challenger defender', 'name')
-    .exec()
+    let query = {};
+    if (req.query.limit == null){
+        req.query.limit = 10
+    }
+
+    if (req.query.page == null) {
+        req.query.page = 1
+    }
+
+    BattleRequest.paginate(query, {page: req.query.page, limit: req.query.limit, populate: [({path: "challenger", select: "name"}), ({path:"defender", select: "name"})]})
     .then( obj => {
-        if ( obj.length >= 1 ){
+        if ( obj.docs.length > 0 ){
             const battleRequest = {
-                count: obj.length,
-                battleRequests: obj.map( obj => {
+                total: obj.totalDocs,
+                count: obj.docs.length,
+                currentPage: obj.page,
+                totalPages: obj.totalPages,
+                battleRequests: obj.docs.map( obj => {
                     return {
                         id: obj.id,
                         challenger: obj.challenger,
                         defender: obj.defender,
-                        status: obj.status
+                        status: obj.status,
+                        url: req.protocol + '://' + req.get('host') + req.originalUrl + '/' + obj._id
                     }
                 })
             }

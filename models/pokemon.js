@@ -1,6 +1,7 @@
 const res = require('express/lib/response');
 const mongoose = require('mongoose');
 const User = require('./user');
+const mongoosePaginate = require('mongoose-paginate-v2');
 
 pokemonSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
@@ -16,6 +17,8 @@ pokemonSchema = mongoose.Schema({
     moves: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Move' }],
     imageUrl: { type: String, required: false }
 });
+
+pokemonSchema.plugin(mongoosePaginate);
 
 pokemonSchema.pre('deleteOne', {document:true}, function(next) {
     User.findOneAndUpdate(

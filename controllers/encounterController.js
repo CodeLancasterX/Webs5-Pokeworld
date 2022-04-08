@@ -6,15 +6,24 @@ const request = require('request');
 const Pokemon = require('../models/pokemon');
 
 exports.get_all_encounters = (req, res, next) => {
-    Encounter.find()
-    .populate('user', 'name')
-    .select('_id pokemon.name user caught')
-    .exec()
+    let query = {};
+    if (req.query.limit == null){
+        req.query.limit = 10
+    }
+
+    if (req.query.page == null) {
+        req.query.page = 1
+    }
+
+    Encounter.paginate(query, {page: req.query.page, limit: req.query.limit, populate: ({ path: 'user', select: 'name' }) /*select: ["name", "starter"]*/})
     .then( encounters => {
-        if (encounters.length > 0) {
+        if (encounters.docs.length > 0) {
             const response = {
-                count: encounters.length,
-                encounters: encounters.map( obj => {
+                total: encounters.totalDocs,
+                count: encounters.docs.length,
+                currentPage: encounters.page,
+                totalPages: encounters.totalPages,
+                encounters: encounters.docs.map( obj => {
                     return {
                         _id: obj._id,
                         name: obj.user,

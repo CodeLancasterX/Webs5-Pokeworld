@@ -13,16 +13,27 @@ const user = require('../models/user');
 const ObjectId = require('mongoose').Types.ObjectId;
 
 exports.get_all_users = (req, res, next) => {
-    User.find()
-        .select('name')
-        .exec()
+    let query = {};
+    if (req.query.limit == null){
+        req.query.limit = 10
+    }
+
+    if (req.query.page == null) {
+        req.query.page = 1
+    }
+    
+
+    User.paginate(query, {page: req.query.page, limit: req.query.limit, select: "name" /*select: ["name", "starter"]*/})
         .then(obj => {
 
-            if (obj.length >= 1) {
+            if (obj.docs.length > 0) {
 
                 const response = {
-                    count: obj.length,
-                    users: obj.map(obj => {
+                    total: obj.totalDocs,
+                    count: obj.docs.length,
+                    currentPage: obj.page,
+                    totalPages: obj.totalPages,
+                    users: obj.docs.map(obj => {
                         return {
                             name: obj.name,
                             _id: obj._id,

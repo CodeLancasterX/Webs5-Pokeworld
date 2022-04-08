@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const User = require('./user');
+const mongoosePaginate = require('mongoose-paginate-v2');
 
 encounterSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
@@ -15,5 +16,7 @@ encounterSchema = mongoose.Schema({
     },
     caught: { type: Boolean, required: false, default: false }
 });
+
+encounterSchema.plugin(mongoosePaginate);
 
 module.exports = mongoose.model('Encounter', encounterSchema);

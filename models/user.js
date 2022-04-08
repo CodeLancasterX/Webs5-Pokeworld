@@ -4,6 +4,7 @@ const BattleRequest = require('./battleRequest');
 const Battle = require('./battle');
 const Encounter = require('./encounter');
 const Pokemon = require('./pokemon');
+const mongoosePaginate = require('mongoose-paginate-v2');
 
 userSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
@@ -13,6 +14,8 @@ userSchema = mongoose.Schema({
     caughtPokemon: [{ type: mongoose.Schema.Types.ObjectId, required: true, ref: 'Pokemon'}],
     isAdmin: {type: Boolean, required: false, default: false}
 });
+
+userSchema.plugin(mongoosePaginate);
 
 userSchema.pre('deleteOne', {document:true}, async function(next) {
     const userOwnedPokemon = await Pokemon.find({owner: this._id});

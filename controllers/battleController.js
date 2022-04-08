@@ -3,28 +3,35 @@ const User = require('../models/user');
 const mongoose = require('mongoose');
 
 exports.get_all_battles = (req, res, next) => {
+    let query = {};
+    if (req.query.limit == null){
+        req.query.limit = 10
+    }
 
-    Battle.find()
-    .select('challenger defender winner')
-    .populate('challenger defender winner', 'name')
-    .exec()
+    if (req.query.page == null) {
+        req.query.page = 1
+    }
+    
+    Battle.paginate(query, {page: req.query.page, limit: req.query.limit, populate: [({path: "challenger", select: "name"}), ({path: "defender", select: "name"}), ({path: "winner", select: "name"})]})
     .then( result => {
-
-        if (result){
+  
+        if (result.docs.length > 0){
 
             const battle = {
-                count: result.length,
-                battles: result.map( result => {
-                    return {
-                        challenger: result.challenger,
-                        defender: result.defender,
-                        status: result.status,
-                        url: req.protocol + '://' + req.get('host') + req.originalUrl + '/' + result._id
+                total: result.totalDocs,
+                count: result.docs.length,
+                currentPage: result.page,
+                totalPages: result.totalPages,
+                battles: result.docs.map( obj => {
+                    return {  
+                        challenger: obj.challenger,
+                        defender: obj.defender,
+                        winner: obj.winner,
+                        url: req.protocol + '://' + req.get('host') + req.originalUrl + '/' + obj._id
 
                     }
                 })
             }
-
             res.status(200).json(battle);
         } else {
             res.status(404).json({ message: "No battles found."})

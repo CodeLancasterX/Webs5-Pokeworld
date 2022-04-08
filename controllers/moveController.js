@@ -3,20 +3,31 @@ const mongoose = require('mongoose');
 
 //get all moves
 exports.get_all_moves = (req, res, next) => {
-    Move.find()
-    .select('-__v')
-    .exec()
+    let query = {};
+    if (req.query.limit == null){
+        req.query.limit = 10
+    }
+
+    if (req.query.page == null) {
+        req.query.page = 1
+    }
+
+    Move.paginate(query, {page: req.query.page, limit: req.query.limit/*select: ["name", "starter"]*/})
     .then( result => {
-        if (result.length > 0){
+        if (result.docs.length > 0){
             const moves = {
-                count: result.length,
-                moves: result.map( obj => {
+                total: result.totalDocs,
+                count: result.docs.length,
+                currentPage: result.page,
+                totalPages: result.totalPages,
+                moves: result.docs.map( obj => {
                     return {
                         _id: obj._id,
                         name: obj.name,
                         description: obj.description,
                         type: obj.type,
-                        accuracy: obj.accuracy
+                        accuracy: obj.accuracy,
+                        url: req.protocol + '://' + req.get('host') + req.originalUrl + '/' + obj._id
                     }
                 })
             }
