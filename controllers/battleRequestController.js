@@ -51,7 +51,6 @@ exports.get_battleRequest_by_id = (req, res, next) => {
     .populate('challenger defender', 'name')
     .exec()
     .then( result => {
-        // console.log(result);
 
         if (result) {
             res.status(200).json(result)
