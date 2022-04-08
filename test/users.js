@@ -7,11 +7,11 @@ chai.use(chaiHttp);
 
 let token;
 
-
+let agent = chai.request.agent(server);
 
 describe('Admin and user should be created and cascade deleted with chosen pokemon and encounters.', () => {
 
-    let agent = chai.request.agent(server);
+    
     
     let adminUser = {
         name: "CJTheNewTest",
