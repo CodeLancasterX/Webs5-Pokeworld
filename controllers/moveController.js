@@ -8,7 +8,19 @@ exports.get_all_moves = (req, res, next) => {
     .exec()
     .then( result => {
         if (result.length > 0){
-            res.status(200).json(result)
+            const moves = {
+                count: result.length,
+                moves: result.map( obj => {
+                    return {
+                        _id: obj._id,
+                        name: obj.name,
+                        description: obj.description,
+                        type: obj.type,
+                        accuracy: obj.accuracy
+                    }
+                })
+            }
+            res.status(200).json(moves)
         } else {
             res.status(404).json({
                 message: 'Could not find any moves.'
@@ -58,6 +70,7 @@ exports.create_move =  (req, res, next) => {
         console.log(result);
 
         res.status(201).json({
+            _id: move._id,
             message: "Move: \`" + move.name + "\` has been created.",
             url: req.protocol + '://' + req.get('host') + req.baseUrl + '/' + move._id
         });

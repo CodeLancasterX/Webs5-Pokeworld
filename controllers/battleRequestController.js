@@ -139,7 +139,7 @@ exports.update_battleRequest_by_id = (req, res, next) => {
             }})
             .exec()
             .then( result => {
-                console.log(result);
+                
                 if (result.matchedCount > 0) {
                     if (result.modifiedCount < 1) {
                         return res.status(200).json({
@@ -167,7 +167,6 @@ exports.update_battleRequest_by_id = (req, res, next) => {
                                 })
                                 battle.save()
                                 .then( battleResult => {
-                                    console.log(battleResult);
                                     battleRequest.battleId = battle._id;
                                     battleRequest.message = 'Battle request with ID: '+ id + ' has been updated.';
                                     battleRequest.battleUrl = req.protocol + '://' + req.get('host') + '/' + 'battles/'+ battle._id

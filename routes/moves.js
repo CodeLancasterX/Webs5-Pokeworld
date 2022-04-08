@@ -8,7 +8,7 @@ router.get('/', MoveController.get_all_moves)
 
 router.get('/:moveId', MoveController.get_move_by_id)
 
-router.post('/new', checkAuth, checkAdmin, MoveController.create_move)
+router.post('/', checkAuth, checkAdmin, MoveController.create_move)
 
 router.patch('/:moveId', checkAuth, checkAdmin, MoveController.update_move_by_id)
 

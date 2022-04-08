@@ -112,11 +112,9 @@ describe('Battle request should be created, read, edited and deleted.', () => {
                 .patch(`/battlerequests/${battleRequestId}`)
                 .send({token: token, status: "Accepted"})
                 .end((err, res) => {
-                    console.log(res.body)
                     battleId = res.body.battleId;
                     expect(err).to.be.null;
                     expect(res).to.have.status(201);
-
                     done();
                 });
 
@@ -131,7 +129,6 @@ describe('Battle request should be created, read, edited and deleted.', () => {
                 .end((err, res) => {
                     expect(err).to.be.null;
                     expect(res).to.have.status(200);
-                    console.log(res.body)
                     done();
                 });
 

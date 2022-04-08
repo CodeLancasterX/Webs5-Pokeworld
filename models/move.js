@@ -6,7 +6,7 @@ moveSchema = mongoose.Schema({
     name: {type: String, required: true, unique: true},
     description: {type: String, required: false},
     type: {type: String, required: false},
-    accuracy: {type: Number, required: false},
+    accuracy: {type: Number, required: false, min: 0, max: 100, default: null},
     power: {type: Number, required: false, default: null}
 });
 

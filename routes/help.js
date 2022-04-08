@@ -8,7 +8,7 @@ router.get('/', (req, res, next) => {
                 {battleRequestRoutes: ['get_all_battleRequests: /', 'get_battleRequest_by_id: /:id', '(Login) create_battleRequest: /', '(Login) update_battleRequest_by_id: /:id', '(Login) delete_battleRequest_by_id: /:id']},
                 {battleRoutes: ['get_all_battles: /', 'get_battle_by_id: /:id', '(Login & Admin) create_battle: /', '(Login & Admin) update_battle_by_id: /:id', '(Login & Admin) delete_battle_by_id: /:id']},
                 {encounterRoutes: ['get_all_encounters: /', 'get_encounter_by_id: /:id', 'create_encounter: /new', 'update_encounter: /:encounterId', 'delete_encounter_by_id: /:id']},
-                {moveRoutes: ['get_all_moves: /', 'get_move_by_id: /:moveId', '(Login & Admin) create_move: /new', '(Login & Admin) update_move_by_id: /:moveId', '(Login & Admin) delete_move_by_id: /:moveId']},
+                {moveRoutes: ['get_all_moves: /', 'get_move_by_id: /:moveId', '(Login & Admin) create_move: /', '(Login & Admin) update_move_by_id: /:moveId', '(Login & Admin) delete_move_by_id: /:moveId']},
                 {pokemonRoutes: ['get_all_pokemon: /', 'get_pokemon_by_Id: /:pokemonId', 'get_all_starter_pokemon: /starters', '(Login & Admin) create_pokemon: /', '(Login & Admin) edit_pokemon: /:pokemonId', '(Login & Admin) delete_pokemon: /:pokemonId']}
                 ]
     }

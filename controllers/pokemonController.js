@@ -21,7 +21,7 @@ exports.get_all_pokemon = (req, res, next) => {
                     }
                 })
             }
-            console.log(response);
+
             res.status(200).json(response);
 
         } else {
@@ -45,7 +45,7 @@ exports.get_pokemon_by_Id = (req, res, next) => {
     .select('-_v')
     .exec()
     .then( obj => {
-        console.log(obj)
+        // console.log(obj)
         if (obj) {
             res.status(200).json(obj)
         } else {
@@ -102,9 +102,10 @@ exports.create_pokemon = (req, res, next) => {
     });
     //exec turn the following into a promise
     pokemon.save().then(result => {
-        console.log(result);
+        // console.log(result);
 
         res.status(201).json({
+            _id: pokemon._id,
             message: "Pokemon: \`"+ pokemon.name + "\` has been created.",
             url: req.protocol + '://' + req.get('host') + req.originalUrl + '/' + pokemon._id
         });
@@ -127,7 +128,7 @@ exports.update_pokemon_by_id = (req, res, next) => {
     }})
     .exec()
     .then( result => {
-        console.log(result);
+        // console.log(result);
         const pokemon = {
             message: req.body.name + " has been updated.",
             _id: id,

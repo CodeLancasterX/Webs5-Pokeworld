@@ -15,7 +15,7 @@
   },
   "scripts": {
     "start": "nodemon server.js",
-    "test": "mocha test/battleRequests --timeout 10000"
+    "test": "mocha test/pokemon --timeout 10000"
   },
   "devDependencies": {
     "chai": "^4.3.6",
