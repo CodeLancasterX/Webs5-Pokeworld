@@ -109,7 +109,7 @@ describe('Battle request should be created, read, edited and deleted.', () => {
         it('It should edit a specific battle request.', (done) => {
 
                 agent
-                .patch(`/battlerequests/${battleRequestId}`)
+                .put(`/battlerequests/${battleRequestId}`)
                 .send({token: token, status: "Accepted"})
                 .end((err, res) => {
                     battleId = res.body.battleId;

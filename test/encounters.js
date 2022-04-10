@@ -158,7 +158,7 @@ describe("User", () => {
         describe('PATCH /encounters/:id', () => {
             it('It should UPDATE an encounter so that a pokemon is caught.', (done) => {
                 agent
-                    .patch(`/encounters/${encounterId}`)
+                    .put(`/encounters/${encounterId}`)
                     .send({token: token, encounterId: encounterId, caught: true})
                     .end((err, res) => {
                         expect(err).to.be.null;

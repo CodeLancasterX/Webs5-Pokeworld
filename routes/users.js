@@ -25,13 +25,13 @@ router.post('/login', UserController.login)
 
 router.post('/:userId/encounters', checkAuth, UserController.create_encounter)
 
-router.patch('/:userId/encounters/:encounterId', checkAuth, UserController.update_encounter)
+router.put('/:userId/encounters/:encounterId', checkAuth, UserController.update_encounter)
 
-router.patch('/:userId', checkAuth, UserController.update_user_by_id)
+router.put('/:userId', checkAuth, UserController.update_user_by_id)
 
-router.patch('/:userId/pokemon/:pokemonId/moves', checkAuth, UserController.update_pokemonMoves_by_userId)
+router.put('/:userId/pokemon/:pokemonId/moves', checkAuth, UserController.update_pokemonMoves_by_userId)
 
-router.patch('/:userId/pokemon/:pokemonId', checkAuth, UserController.update_pokemon_by_userId)
+router.put('/:userId/pokemon/:pokemonId', checkAuth, UserController.update_pokemon_by_userId)
 
 router.delete('/:userId', checkAuth, checkAdmin, UserController.delete_user_by_userId)
 

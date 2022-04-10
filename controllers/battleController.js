@@ -23,7 +23,8 @@ exports.get_all_battles = (req, res, next) => {
                 currentPage: result.page,
                 totalPages: result.totalPages,
                 battles: result.docs.map( obj => {
-                    return {  
+                    return {
+                        _id: obj._id,  
                         challenger: obj.challenger,
                         defender: obj.defender,
                         winner: obj.winner,
@@ -92,8 +93,9 @@ exports.create_battle = (req, res, next) => {
 
 exports.update_battle_by_id = (req, res, next) => {
     
-    const battleId = req.body.battleId;
+    const battleId = req.params.id;
     const winnerId = req.body.winner;
+    console.log(battleId)
     User.findById(winnerId)
     .exec()
     .then( result => {

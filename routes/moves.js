@@ -10,7 +10,7 @@ router.get('/:moveId', MoveController.get_move_by_id)
 
 router.post('/', checkAuth, checkAdmin, MoveController.create_move)
 
-router.patch('/:moveId', checkAuth, checkAdmin, MoveController.update_move_by_id)
+router.put('/:moveId', checkAuth, checkAdmin, MoveController.update_move_by_id)
 
 router.delete('/:moveId', checkAuth, checkAdmin, MoveController.delete_move_by_id)
 

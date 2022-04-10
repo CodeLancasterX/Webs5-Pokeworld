@@ -141,7 +141,7 @@ describe("User", () => {
         describe('PATCH /battles/:id', () => {
             it('It should UPDATE a battle so that there is a winner.', (done) => {
                 agent
-                    .patch('/battles/:id')
+                    .put('/battles/:id')
                     .send({token: token, winner: defaultUser._id, battleId: battleId})
                     .end((err, res) => {
                         expect(err).to.be.null;

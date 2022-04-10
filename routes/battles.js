@@ -14,7 +14,7 @@ router.get('/:id', BattleController.get_battle_by_id)
 router.post('/', checkAuth, checkAdmin, BattleController.create_battle)
 
 //update battles
-router.patch('/:id', checkAuth, checkAdmin, BattleController.update_battle_by_id)
+router.put('/:id', checkAuth, checkAdmin, BattleController.update_battle_by_id)
 
 //delete battles
 router.delete('/:id', checkAuth, checkAdmin, BattleController.delete_battle_by_id)

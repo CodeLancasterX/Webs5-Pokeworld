@@ -119,7 +119,7 @@ describe('Move should be created, read, edited and deleted.', () => {
                 token: token
             }
                 agent
-                .patch(`/moves/${moveId}`)
+                .put(`/moves/${moveId}`)
                 .send(data)
                 .end((err, res) => {
                     console.log(res.body)

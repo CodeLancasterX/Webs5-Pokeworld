@@ -1021,34 +1021,6 @@ exports.delete_user_by_userId = async (req, res, next) => {
             message: 'No user found.'
         })
     }
-
-
-
-    // .exec()
-    // .then( user => {
-    //     if ( user ) {
-    //         User.deleteOne({
-    //             _id: user._id
-    //         })
-    //         .exec()
-    //         .then(result => {
-    //             console.log(result);
-    
-
-    //         })
-    //         .catch(err => {
-    //             console.log(err)
-    //             res.status(500).json({
-    //                 error: err
-    //             });
-    //         });
-    //     } else {
-    //         res.status(404).json({
-    //             message: 'No user found.'
-    //         })
-    //     }
-    // })
-
    
 }
 

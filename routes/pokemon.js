@@ -13,7 +13,7 @@ router.get('/starters', PokemonController.get_all_starter_pokemon);
 router.get('/:pokemonId', PokemonController.get_pokemon_by_Id);
 
 //create pokemon
-router.post('/', checkAuth, checkAdmin, PokemonController.create_pokemon);
+router.put('/', checkAuth, checkAdmin, PokemonController.create_pokemon);
 
 //update pokemon
 router.patch('/:pokemonId', checkAuth, checkAdmin, PokemonController.update_pokemon_by_id);

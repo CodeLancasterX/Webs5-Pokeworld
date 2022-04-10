@@ -11,7 +11,7 @@ router.get('/:id', BattleRequestController.get_battleRequest_by_id);
 
 router.post('/', checkAuth, BattleRequestController.create_battleRequest);
 
-router.patch('/:id', checkAuth, BattleRequestController.update_battleRequest_by_id);
+router.put('/:id', checkAuth, BattleRequestController.update_battleRequest_by_id);
 
 router.delete('/:id', checkAuth, BattleRequestController.delete_battleRequest_by_id);
 

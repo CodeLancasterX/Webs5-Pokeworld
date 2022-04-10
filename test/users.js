@@ -231,7 +231,7 @@ describe('User should update account', () => {
                 token: token
             }
             agent
-                .patch(`/users/${adminUser._id}`)
+                .put(`/users/${adminUser._id}`)
                 .send(data)
                 .end((err, res) => {
                     console.log(res.body)
@@ -321,7 +321,7 @@ describe('User should update pokemon', () => {
                 token: token
             }
             agent
-                .patch(`/users/${adminUser._id}/pokemon/${adminUser.pokemonId}`)
+                .put(`/users/${adminUser._id}/pokemon/${adminUser.pokemonId}`)
                 .send(data)
                 .end((err, res) => {
                     expect(err).to.be.null;
@@ -344,7 +344,7 @@ describe('User should update pokemon', () => {
                 token: token
             }
             agent
-                .patch(`/users/${adminUser._id}/pokemon/${adminUser.pokemonId}/moves`)
+                .put(`/users/${adminUser._id}/pokemon/${adminUser.pokemonId}/moves`)
                 .send(data)
                 .end((err, res) => {
                     expect(err).to.be.null;
@@ -366,7 +366,7 @@ describe('User should update pokemon', () => {
                 token: token
             }
             agent
-                .patch(`/users/${adminUser._id}/pokemon/${adminUser.pokemonId}/moves`)
+                .put(`/users/${adminUser._id}/pokemon/${adminUser.pokemonId}/moves`)
                 .send(data)
                 .end((err, res) => {
                     console.log(res.body)
@@ -445,7 +445,7 @@ describe('User should update encounter', () => {
                 token: token
             }
             agent
-                .patch(`/users/${adminUser._id}`)
+                .put(`/users/${adminUser._id}`)
                 .send(data)
                 .end((err, res) => {
                     console.log(res.body)
@@ -524,7 +524,7 @@ describe('User should update pokemon moves', () => {
                 token: token
             }
             agent
-                .patch(`/users/${adminUser._id}`)
+                .put(`/users/${adminUser._id}`)
                 .send(data)
                 .end((err, res) => {
                     console.log(res.body)

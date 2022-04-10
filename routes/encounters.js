@@ -10,7 +10,7 @@ router.get('/:id', EncounterController.get_encounter_by_id);
 
 router.post('/', checkAuth, checkAdmin, EncounterController.create_encounter);
 
-router.patch('/:encounterId', checkAuth, checkAdmin, EncounterController.update_encounter);
+router.put('/:encounterId', checkAuth, checkAdmin, EncounterController.update_encounter);
 
 router.delete('/:id', checkAuth, checkAdmin, EncounterController.delete_encounter_by_id);
 

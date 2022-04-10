@@ -14,10 +14,11 @@ exports.get_all_encounters = (req, res, next) => {
     if (req.query.page == null) {
         req.query.page = 1
     }
-
+    console.log(query)
     Encounter.paginate(query, {page: req.query.page, limit: req.query.limit, populate: ({ path: 'user', select: 'name' }) /*select: ["name", "starter"]*/})
     .then( encounters => {
         if (encounters.docs.length > 0) {
+            console.log(encounters)
             const response = {
                 total: encounters.totalDocs,
                 count: encounters.docs.length,
