@@ -11,11 +11,22 @@ chai.should();
 chai.use(chaiHttp);
 
 //create jwt token authentication.
-const defaultUser = {
-    _id: '62435de9e3fc1bcdedd774f5',
-    email: 'CJTheTest@lancaster.com',
-    password: 'password'
+let adminUser = {
+    name: "CJTheBattleAdmin",
+    email: "CJTheBattleAdmin@NewLancaster.com",
+    password: "password",
+    pokemon: "squirtle",
+    isAdmin: true
 }
+
+let defaultUser = {
+    name: 'CJTheBattleUser',
+    email: 'CJTheBattleUser@NewLancaster.com',
+    password: 'password',
+    pokemon: 'bulbasaur',
+    isAdmin: false
+}
+
 
 
 let token;
@@ -25,26 +36,74 @@ describe("User", () => {
 
     let agent = chai.request.agent(server);
 
-    beforeEach( function(done){
-        agent
-            .post("/users/login")
-            .send(defaultUser)
-            
-            .end((err, res) => {
-                expect(err).to.be.null;
-                expect(res).to.have.status(200);
-                // console.log(token)
-                // console.log(res.body)
-                res.should.have.status(200);
-                token = res.body.token;
-                done();
-            });
-
-    });
-
     describe('Battleroutes', () => {
 
+        describe('POST /users/signup admin', () => {
+            it('It should sign up an admin.', (done) => {
+                agent
+                    .post("/users/signup")
+                    .send(adminUser)
+                    .end((err, res) => {
+                        expect(err).to.be.null;
+                        expect(res).to.have.status(201);
+                        adminUser._id = res.body._id;
+                        done();
+                    });
+            })
+        })
 
+
+        describe('POST /users/signup default user', () => {
+            it('It should signup a default user.', (done) => {
+                agent
+                    .post("/users/signup")
+                    .send(defaultUser)
+                    .end((err, res) => {
+                        expect(err).to.be.null;
+                        expect(res).to.have.status(201);
+                        defaultUser._id = res.body._id;
+                        done();
+                    });
+            })
+        })
+
+        describe('POST /users/login admin', () => {
+            it('It should login an admin.', (done) => {
+                agent
+                    .post("/users/login")
+                    .send(adminUser)
+                    .end((err, res) => {
+                        expect(err).to.be.null;
+                        expect(res).to.have.status(200);
+                        token = res.body.token;
+                        done();
+                    })
+            })
+        })
+
+        /**
+         * Test POST route.
+         */
+        describe('POST /battles', () => {
+            it('It should CREATE a new battle.', (done) => {
+                const defender = defaultUser._id
+                agent
+                    .post('/battles')
+                    .send({
+                        token: token,
+                        challenger: adminUser._id,
+                        defender: defender,
+                        winner: null
+                    })
+                    .end((err, res) => {
+                        expect(err).to.be.null;
+                        expect(res).to.have.status(201);
+                        battleId = res.body._id;
+                        done();
+                    });
+
+            })
+        })
 
         /**
          * Test GET route.
@@ -78,7 +137,7 @@ describe("User", () => {
          */
         describe('GET /battles/:id', () => {
             it('It should GET a battle by ID.', (done) => {
-                const id = '6231af3fad6e38e97fa54f88'
+                const id = battleId
                 agent
                     .get('/battles/' + id)
                     .end((err, res) => {
@@ -117,32 +176,16 @@ describe("User", () => {
         })
 
         /**
-         * Test POST route.
-         */
-        describe('POST /battles', () => {
-            it('It should CREATE a new battle.', (done) => {
-                const defender = '621993e4ce59ffa0a0b4052e'
-                agent
-                    .post('/battles')
-                    .send({token: token, challenger: defaultUser._id, defender: defender, winner: null})
-                    .end((err, res) => {
-                        expect(err).to.be.null;
-                        expect(res).to.have.status(201);
-                        battleId = res.body._id;
-                        done();
-                    });
-
-            })
-        })
-
-        /**
          * Test PATCH route.
          */
         describe('PATCH /battles/:id', () => {
             it('It should UPDATE a battle so that there is a winner.', (done) => {
                 agent
-                    .put('/battles/:id')
-                    .send({token: token, winner: defaultUser._id, battleId: battleId})
+                    .put(`/battles/${battleId}`)
+                    .send({
+                        token: token,
+                        winner: adminUser._id,
+                    })
                     .end((err, res) => {
                         expect(err).to.be.null;
                         expect(res).to.have.status(201);
@@ -154,16 +197,49 @@ describe("User", () => {
         /**
          * Test DELETE route.
          */
-         describe('DELETE /battles/:id', () => {
+        describe('DELETE /battles/:id', () => {
             it('It should DELETE a battle.', (done) => {
                 agent
                     .delete(`/battles/${battleId}`)
-                    .send({token: token})
+                    .send({
+                        token: token
+                    })
                     .end((err, res) => {
                         expect(err).to.be.null;
                         expect(res).to.have.status(200);
                         done();
                     });
+            })
+        })
+
+        //delete test.
+        describe('DELETE /users/:id', () => {
+            it('It should DELETE a default user.', (done) => {
+                agent
+                    .delete(`/users/${defaultUser._id}`)
+                    .send({
+                        token: token
+                    })
+                    .end((err, res) => {
+                        expect(err).to.be.null;
+                        expect(res).to.have.status(200);
+                        done();
+                    })
+            })
+        })
+
+        describe('DELETE /users/:id', () => {
+            it('It should DELETE an admin user.', (done) => {
+                agent
+                    .delete(`/users/${adminUser._id}`)
+                    .send({
+                        token: token
+                    })
+                    .end((err, res) => {
+                        expect(err).to.be.null;
+                        expect(res).to.have.status(200);
+                        done();
+                    })
             })
         })
     })

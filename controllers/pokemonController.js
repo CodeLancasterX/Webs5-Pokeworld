@@ -164,10 +164,21 @@ exports.delete_pokemon = async (req, res, next) => {
     const pokemonId = req.params.pokemonId;
     const pokemon = await Pokemon.findById(pokemonId);
     if (pokemon) {
-        pokemon.deleteOne();
-             res.status(200).json({
-                 message: `${pokemon.name} has been deleted.`
-             })
+        
+        Pokemon.deleteOne({_id: pokemonId})
+        .exec()
+        .then( result => {
+            res.status(200).json({
+                message: `${pokemon.name} has been deleted.`
+            })
+        })
+        .catch( err => {
+            res.status(500).json({
+                error: err
+            })
+        })
+ 
+
     } else {
         req.status(404).json({message: `No pokemon found for ID: ${pokemonId}.`})
     }

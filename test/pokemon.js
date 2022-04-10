@@ -122,7 +122,7 @@ describe('Pokemon should be created, read, edited and deleted.', () => {
         })
     })
 
-    describe('PATCH /pokemon/:id', () => {
+    describe('PUT /pokemon/:id', () => {
         it('It should edit a specific pokemon.', (done) => {
             let data = {
                 name: "editedNewPokemon",
@@ -146,6 +146,21 @@ describe('Pokemon should be created, read, edited and deleted.', () => {
     })
 
     //delete test.
+    describe('DELETE /pokemon/:id', () => {
+        it('It should a DELETE pokemon.', (done) => {
+            agent
+                .delete(`/pokemon/${pokemonId}`)
+                .send({
+                    token: token
+                })
+                .end((err, res) => {
+                    expect(err).to.be.null;
+                    expect(res).to.have.status(200);
+                    done();
+                })
+        })
+    })
+
     describe('DELETE /users/:id', () => {
         it('It should DELETE a default user.', (done) => {
             agent
@@ -176,20 +191,7 @@ describe('Pokemon should be created, read, edited and deleted.', () => {
         })
     })
 
-    describe('DELETE /pokemon/:id', () => {
-        it('It should a DELETE pokemon.', (done) => {
-            agent
-                .delete(`/pokemon/${pokemonId}`)
-                .send({
-                    token: token
-                })
-                .end((err, res) => {
-                    expect(err).to.be.null;
-                    expect(res).to.have.status(200);
-                    done();
-                })
-        })
-    })
+
 
 
 })
