@@ -11,7 +11,7 @@ userSchema = mongoose.Schema({
     email: { type: String, required: true, validate: validator.isEmail}, /*adding unique: true was also an option*/
     password: { type: String, required: true}, //range validator.
     name: { type: String, required: true, unique: true, minLength: 8, maxLength: 30},
-    caughtPokemon: [{ type: mongoose.Schema.Types.ObjectId, required: true, ref: 'Pokemon'}],
+    caughtPokemon: [{ type: mongoose.Schema.Types.ObjectId, required: false, ref: 'Pokemon'}],
     isAdmin: {type: Boolean, required: false, default: false}
 });
 

@@ -9,16 +9,38 @@ let token;
 
 let agent = chai.request.agent(server);
 
-describe('Admin and user should be created and cascade deleted with chosen pokemon and encounters.', () => {
+let starterCharmander = {
+    name: "charmander",
+    starter: true,
+}
 
-    
+let starterSquirtle = {
+    name: "squirtle",
+    starter: true,
+}
+
+let starterBulbasaur = {
+    name: "bulbasaur",
+    starter: true,
+}
+
+let headAdmin = {
+    name: "HeadAdmin",
+    email: "HeadAdmin@NewLancaster.com",
+    password: "password",
+    isAdmin: true,
+    noPokemon: true
+}
+
+describe('Admin and user should be created and cascade deleted with chosen pokemon and encounters.', () => {
     
     let adminUser = {
         name: "CJTheNewTest",
         email: "CJTheNewTest@NewLancaster.com",
         password: "password",
         pokemon: "squirtle",
-        isAdmin: true
+        isAdmin: true,
+
     }
     
     let defaultUser = {
@@ -28,7 +50,82 @@ describe('Admin and user should be created and cascade deleted with chosen pokem
         pokemon: 'bulbasaur',
         isAdmin: false
     }
-    
+
+    describe('POST /users/signup head admin', () => {
+        it('It should signup a head admin.', (done) => {
+            agent
+                .post("/users/signup")
+                .send(headAdmin)
+                .end((err, res) => {
+                    expect(err).to.be.null;
+                    expect(res).to.have.status(201);
+                    headAdmin._id = res.body._id
+                    // console.log(res)
+                    done();
+                });
+        })
+    })
+
+    describe('POST /users/login', () => {
+        it('It should login a head admin.', (done) => {
+            agent
+                .post("/users/login")
+                .send(headAdmin)
+                .end((err, res) => {
+                    expect(err).to.be.null;
+                    expect(res).to.have.status(200);
+                    token = res.body.token;
+                    starterCharmander.token = token;
+                    starterBulbasaur.token = token;
+                    starterSquirtle.token = token;
+                    done();
+                })
+        })
+    })
+
+    describe('POST /pokemon admin user', () => {
+        it('It should create a pokemon.', (done) => {
+            agent
+                .post("/pokemon")
+                .send(starterCharmander)
+                .end((err, res) => {
+                    console.log(res.body)
+                    expect(err).to.be.null;
+                    expect(res).to.have.status(201);
+                    starterCharmander._id = res.body._id;
+                    done();
+                });
+        })
+    })
+
+    describe('POST /pokemon admin user', () => {
+        it('It should create a pokemon.', (done) => {
+            agent
+                .post("/pokemon")
+                .send(starterSquirtle)
+                .end((err, res) => {
+                    expect(err).to.be.null;
+                    expect(res).to.have.status(201);
+                    starterSquirtle._id = res.body._id;
+                    done();
+                });
+        })
+    })
+
+    describe('POST /pokemon admin user', () => {
+        it('It should create a pokemon.', (done) => {
+            agent
+                .post("/pokemon")
+                .send(starterBulbasaur)
+                .end((err, res) => {
+                    expect(err).to.be.null;
+                    expect(res).to.have.status(201);
+                    starterBulbasaur._id = res.body._id;
+                    done();
+                });
+        })
+    })
+
     /**
      * Test signup route.
      */
@@ -62,21 +159,6 @@ describe('Admin and user should be created and cascade deleted with chosen pokem
         })
     })
 
-    //pokemon creation on signup test.
-    describe('GET /users/:id/pokemon', () => {
-        it('It should GET all admin\'s pokemon.', (done) => {
-            agent
-                .get(`/users/${adminUser._id}/pokemon`)
-                .end((err, res) => {
-                    expect(res).to.have.status(200);
-                    expect(res.body.pokemon).to.be.a('array');
-                    expect(res.body.pokemon.length).to.eq(res.body.count);
-                    adminUser.pokemonId = res.body.pokemon[0]._id
-                    done();
-                })
-        })
-    })
-
     describe('POST /users/login', () => {
         it('It should login a user.', (done) => {
             agent
@@ -87,6 +169,23 @@ describe('Admin and user should be created and cascade deleted with chosen pokem
                     expect(res).to.have.status(200);
                     token = res.body.token;
                     adminUser._id = res.body._id
+                    done();
+                })
+        })
+    })
+
+
+
+    //pokemon creation on signup test.
+    describe('GET /users/:id/pokemon', () => {
+        it('It should GET all admin\'s pokemon.', (done) => {
+            agent
+                .get(`/users/${adminUser._id}/pokemon`)
+                .end((err, res) => {
+                    expect(res).to.have.status(200);
+                    expect(res.body.pokemon).to.be.a('array');
+                    expect(res.body.pokemon.length).to.eq(res.body.count);
+                    adminUser.pokemonId = res.body.pokemon[0]._id
                     done();
                 })
         })
@@ -205,7 +304,7 @@ describe('User should update account', () => {
                     done();
   
                 });
-        }).timeout(5000)
+        })
     })
 
     describe('POST /users/login', () => {
@@ -489,7 +588,7 @@ describe('User should update pokemon moves', () => {
                 .send(adminUser)
                 .end((err, res) => {
 
-                    console.log(res.body)
+                    // console.log(res.body)
                     expect(err).to.be.null;
                     expect(res).to.have.status(201);
                     // console.log(res.body)
@@ -498,7 +597,7 @@ describe('User should update pokemon moves', () => {
                     done();
   
                 });
-        }).timeout(5000)
+        })
     })
 
     describe('POST /users/login', () => {
@@ -535,8 +634,68 @@ describe('User should update pokemon moves', () => {
         })
     })
 
+    describe('DELETE /pokemon/:id', () => {
+        it('It should a DELETE starter pokemon.', (done) => {
+            agent
+                .delete(`/pokemon/${starterCharmander._id}`)
+                .send({
+                    token: token
+                })
+                .end((err, res) => {
+                    expect(err).to.be.null;
+                    expect(res).to.have.status(200);
+                    done();
+                })
+        })
+    })
+
+    describe('DELETE /pokemon/:id', () => {
+        it('It should a DELETE starter pokemon.', (done) => {
+            agent
+                .delete(`/pokemon/${starterSquirtle._id}`)
+                .send({
+                    token: token
+                })
+                .end((err, res) => {
+                    expect(err).to.be.null;
+                    expect(res).to.have.status(200);
+                    done();
+                })
+        })
+    })
+
+    describe('DELETE /pokemon/:id', () => {
+        it('It should a DELETE starter pokemon.', (done) => {
+            agent
+                .delete(`/pokemon/${starterBulbasaur._id}`)
+                .send({
+                    token: token
+                })
+                .end((err, res) => {
+                    expect(err).to.be.null;
+                    expect(res).to.have.status(200);
+                    done();
+                })
+        })
+    })
+
     describe('DELETE /users/:id', () => {
-        it('It should DELETE a default user.', (done) => {
+        it('It should DELETE head admin.', (done) => {
+            agent
+                .delete(`/users/${headAdmin._id}`)
+                .send({
+                    token: token
+                })
+                .end((err, res) => {
+                    expect(err).to.be.null;
+                    expect(res).to.have.status(200);
+                    done();
+                })
+        })
+    })
+
+    describe('DELETE /users/:id', () => {
+        it('It should DELETE a admin user.', (done) => {
             agent
                 .delete(`/users/${adminUser._id}`)
                 .send({

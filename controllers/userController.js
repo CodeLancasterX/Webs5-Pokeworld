@@ -360,6 +360,30 @@ exports.sign_up = (req, res, next) => {
                     } else {
                         //poke api does not give starter data and other api's are not functional anymore.
                         // admin can create pokemon with starter true to define starter pokemon.
+                        if(req.body.isAdmin && req.body.noPokemon) {
+                            const user = new User({
+                                _id: new mongoose.Types.ObjectId,
+                                name: req.body.name,
+                                email: req.body.email,
+                                password: hash,
+                                caughtPokemon: [],
+                                isAdmin: req.body.isAdmin /*for testing purposes only*/
+                            });
+                            user.save()
+                            .then( result => {
+                                return res.status(201).json({
+                                    _id: user._id.toHexString(),
+                                    message: "Admin: \`" + user.name + "\` has been created.",
+                                    url: req.protocol + '://' + req.get('host') + req.baseUrl + '/' + user._id.toHexString() 
+                                })
+                            })
+                            .catch(err => {
+                                return res.status(500).json({
+                                    error: err
+                                })
+                            })
+                            return;
+                        }
                         const starter = req.body.pokemon;
                         Pokemon.findOne({
                                 $and: [{
