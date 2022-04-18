@@ -1,0 +1,7 @@
+User registers with a starter pokemon.
+User can get more pokemon through encounters 50% chance of catching.
+if caught pokemon gets added to team.
+else better luck next time.
+whenever user is ready, he/she can request a battle with another user.
+once accepted a new battle is created. 50% chance of winning.
+

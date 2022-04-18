@@ -1,49 +1,41 @@
 const express = require('express');
 const router = express.Router();
-
-//get users
-router.get('/', (req, res, next) => {
-    res.status(200).json({
-        message: 'get user route ready'
-    });
-}); 
-
-//get specific user
-router.get('/:userId', (req, res, next) => {
-    const id = req.params.userId;
-    if (id == '1') {
-        res.status(200).json({
-            message: 'you received id: 1',
-            id: id
-        })
-    } else {
-        res.status(200).json({
-            message: 'some other id that is not 1',
-            id: id
-        })
-    }
-})
+const checkAuth = require('../auth/check-auth');
+const checkAdmin = require('../auth/check-admin');
+const UserController = require('../controllers/userController')
 
 
-//create users
-router.post('/', (req, res, next) => {
-    res.status(200).json({
-        message: 'posting user route ready.'
-    })
-})
+router.get('/', UserController.get_all_users);
 
-//update users
-router.patch('/', (req, res, next) => {
-    res.status(200).json({
-        message: 'update route ready.'
-    })
-})
+router.get('/:userId', UserController.get_user_by_id)
 
-//delete users
-router.delete('/', (req, res, next) => {
-    res.status(200).json({
-        message: 'delete route ready.'
-    })
-})
+router.get('/:userId/encounters', checkAuth, UserController.get_encounter_by_userId)
+
+router.get('/:userId/pokemon', UserController.get_all_pokemon_by_userId)
+
+router.get('/:userId/pokemon/:pokemonId', UserController.get_pokemon_by_userId)
+
+router.get('/:userId/pokemon/:pokemonId/moves/:moveId', checkAuth, UserController.get_pokemonMove_by_pokemon_with_userId)
+
+router.get('/:userId/battles', UserController.get_battles_by_userId)
+
+router.post('/signup', UserController.sign_up)
+
+router.post('/login', UserController.login)
+
+router.post('/:userId/encounters', checkAuth, UserController.create_encounter)
+
+router.put('/:userId/encounters/:encounterId', checkAuth, UserController.update_encounter)
+
+router.put('/:userId', checkAuth, UserController.update_user_by_id)
+
+router.put('/:userId/pokemon/:pokemonId/moves', checkAuth, UserController.update_pokemonMoves_by_userId)
+
+router.put('/:userId/pokemon/:pokemonId', checkAuth, UserController.update_pokemon_by_userId)
+
+router.delete('/:userId', checkAuth, checkAdmin, UserController.delete_user_by_userId)
+
+router.delete('/:userId/pokemon/:pokemonId', checkAuth, UserController.delete_pokemon_by_userId)
+
 
 module.exports = router;
